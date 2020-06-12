@@ -41,7 +41,7 @@ const action = async (userId, userName, action) => {
         case 'open_vc':
             return await otkrivator.openItPark();
         case 'jh':
-            return userName + ', сейчас идут конференции:\n' + await jitsi.health();
+            return userName + ', ' + await jitsi.health();
         case 'open_m':
             return await otkrivator.openMasterskie();
         case 'myself':

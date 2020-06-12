@@ -38,7 +38,13 @@ module.exports.health = () => {
 			}
 
 		});
-		resolve(confs.join('\n'));
+		let responseMessage;
+		if(!confs.length){
+			responseMessage = 'конференции пока не идут';
+		} else {
+			responseMessage = 'сейчас идут конференции:\n' + confs.join('\n');
+		}
+		resolve(responseMessage);
 	} catch(e) {
                 resolve('Ошибка: ' + JSON.stringify(error));
 	}
