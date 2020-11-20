@@ -5,13 +5,13 @@ module.exports.info = () => {
 	let currentState = "";
 
 	let markup = [
-		'<b>1 пара:</b> 08:00 - 09:30',
-		'<b>2 пара:</b> 09:40 - 11:10',
-		'<b>3 пара:</b> 11:30 - 13:00',
-		'<b>4 пара:</b> 13:10 - 14:40',
-		'<b>5 пара:</b> 14:50 - 16:20',
-		'<b>6 пара:</b> 16:30 - 18:00',
-	].join('\n');
+		'<b>1 пара:</b> 08:00 - 09:30\n',
+		'<b>2 пара:</b> 09:40 - 11:10\n',
+		'<b>3 пара:</b> 11:30 - 13:00\n',
+		'<b>4 пара:</b> 13:10 - 14:40\n',
+		'<b>5 пара:</b> 14:50 - 16:20\n',
+		'<b>6 пара:</b> 16:30 - 18:00\n',
+	];
 
 	const markupTime = [		//точность до секунд не важна, используются минуты, прошедшие с начала суток
 		{
@@ -75,39 +75,41 @@ module.exports.info = () => {
 			case 6:				//для субботы
 				break;
 			default:			//рабочая неделя
-				for(let event of markupTime){			//смотрим какое сейчас событие
-					if(minutes - event.sopMinuts < 0){
-						currentState = `Сейчас ${event.description}, до конца ${event.sopMinuts - minutes} минут`;
+				for(let i = 0; i < markupTime.length; ++i){			//смотрим какое сейчас событие
+					if(minutes - markupTime[i].sopMinuts < 0){
+						currentState = `Сейчас ${markupTime[i].description}, до конца ${markupTime[i].sopMinuts - minutes} минут`;
+						if(i % 2 == 0){
+							//markup[i / 2] = `<span style="color: #ff0000;">${markup[i / 2]}</span>`;
+						}
 						break;
 					}
 				}
 				break;
 		}
 	}
-
-	markup += '\n' + currentState;
+	markup.push(currentState);
+	//console.log(Array.prototype.join.call(markup,""));
 
     return new Promise( resolve=>{
-	resolve(markup);
+	resolve(Array.prototype.join.call(markup,""));
     });
 };
 //getDay - номер дня недели
 //getHours()- часы по нашему времени
 
 
-/*
-const dateNow = new Date();
+/*const dateNow = new Date();
 const currentHours = dateNow.getHours();
 let currentState = "";
 
 let markup = [
-	'<b>1 пара:</b> 08:00 - 09:30',
-	'<b>2 пара:</b> 09:40 - 11:10',
-	'<b>3 пара:</b> 11:30 - 13:00',
-	'<b>4 пара:</b> 13:10 - 14:40',
-	'<b>5 пара:</b> 14:50 - 16:20',
-	'<b>6 пара:</b> 16:30 - 18:00',
-].join('\n');
+	'<b>1 пара:</b> 08:00 - 09:30\n',
+	'<b>2 пара:</b> 09:40 - 11:10\n',
+	'<b>3 пара:</b> 11:30 - 13:00\n',
+	'<b>4 пара:</b> 13:10 - 14:40\n',
+	'<b>5 пара:</b> 14:50 - 16:20\n',
+	'<b>6 пара:</b> 16:30 - 18:00\n',
+]/!*.join('\n')*!/;
 
 const markupTime = [		//точность до секунд не важна, используются минуты, прошедшие с начала суток
 	{
@@ -171,16 +173,17 @@ else{
 		case 6:				//для субботы
 			break;
 		default:			//рабочая неделя
-			for(let event of markupTime){			//смотрим какое сейчас событие
-				if(minutes - event.sopMinuts < 0){
-					currentState = `Сейчас ${event.description}, до конца ${event.sopMinuts - minutes} минут`;
+			for(let i = 0; i < markupTime.length; ++i){			//смотрим какое сейчас событие
+				if(minutes - markupTime[i].sopMinuts < 0){
+					currentState = `Сейчас ${markupTime[i].description}, до конца ${markupTime[i].sopMinuts - minutes} минут`;
+					if(i % 2 == 0){
+						//markup[i / 2] = `<span style="color: #ff0000;">${markup[i / 2]}</span>`;
+					}
 					break;
 				}
 			}
 			break;
 	}
 }
-
-markup += '\n' + currentState;
-
-console.log(markup);*/
+markup.push(currentState);
+console.log(Array.prototype.join.call(markup,""));*/
