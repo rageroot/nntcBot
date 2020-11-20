@@ -1,0 +1,20 @@
+{
+  "name": "odfgenerator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "cleanup": "[ -d ./examples/ODT ] && rm -r ./examples/ODT; [ -d ./examples/PDF ] && rm -r ./examples/PDF; [ -d ./examples/tmp* ] && rm -r ./examples/tmp*; rm ./examples/*.zip",
+    "test-single-all": "node ./examples/example-single-all.js",
+    "test-single-pdf": "node ./examples/example-single-pdf.js",
+    "test-single-odt": "node ./examples/example-single-odt.js",
+    "test-multiple-all": "node ./examples/example-multiple-all.js",
+    "test-multiple-pdf": "node ./examples/example-multiple-pdf.js",
+    "test-multiple-odt": "node ./examples/example-multiple-odt.js",
+    "test-multiple-pack-to-zip": "node ./examples/example-multiple-pack-to-zip.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {}
+}

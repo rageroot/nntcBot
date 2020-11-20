@@ -46,7 +46,7 @@ module.exports.health = () => {
 		}
 		resolve(responseMessage);
 	} catch(e) {
-                resolve('Ошибка: ' + JSON.stringify(error));
+                resolve('Ошибка: ' + JSON.stringify(e));
 	}
     });
 };

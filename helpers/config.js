@@ -7,5 +7,8 @@ module.exports.VALID_USERS = [
   '158048277', // kluev
   '577055331', // dasha
   '321111773', // verm
-  '696947736' // bazin
+  '696947736', // bazin
+  '458474499', // ogudina
+  '1390904651', // emsh_g
+  '1232001241' // dariy_segrey
 ];
