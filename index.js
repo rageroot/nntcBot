@@ -8,8 +8,8 @@ const jitsi = require('./helpers/jitsi');
 const bells = require('./helpers/bells');
 const myself = require('./helpers/myself');
 const easterEggs = require('./helpers/easterEggs');
-
 const kursGen = require('./helpers/wizard-kurs-report-generator');
+const menu = require('./helpers/menu');
 
 /*const bot = new Telegraf(cfg.TG_TOKEN, {
     telegram: {
