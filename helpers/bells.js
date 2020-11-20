@@ -89,9 +89,9 @@ module.exports.info = () => {
 	}
 	markup.push(currentState);
 	//console.log(Array.prototype.join.call(markup,""));
-
+	let a = Array.prototype.join.call(markup,"");
     return new Promise( resolve=>{
-	resolve(Array.prototype.join.call(markup,""));
+	resolve(currentState);
     });
 };
 //getDay - номер дня недели
