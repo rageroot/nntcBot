@@ -79,7 +79,7 @@ module.exports.info = () => {
 					if(minutes - markupTime[i].sopMinuts < 0){
 						currentState = `Сейчас ${markupTime[i].description}, до конца ${markupTime[i].sopMinuts - minutes} минут`;
 						if(i % 2 == 0){
-							//markup[i / 2] = `<span style="color: #ff0000;">${markup[i / 2]}</span>`;
+							markup[i / 2] = `<span style="color: #ff0000;">${markup[i / 2]}</span>`;
 						}
 						break;
 					}
