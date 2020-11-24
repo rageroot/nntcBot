@@ -19,6 +19,20 @@ const menu = require('./helpers/menu');
 
 const bot = new Telegraf(cfg.TG_TOKEN);
 
+// ######## Middleware ###########
+
+bot.use(async (ctx, next) => {
+    const start = new Date();
+    await next();
+    const ms  = new Date() - start;
+    ctx.reply(`Запрос выполнен за ${ms} мс`);
+});
+
+// ######## Middleware ###########
+
+
+
+
 const action = async (userId, userName, action) => {
     const ACCESS_DENIED_MESSAGE = userName + ', Вам доступ запрещён. Сообщите ваш ID для добавления полномочий: ' + userId;
     const WELCOME_MESSAGE = [

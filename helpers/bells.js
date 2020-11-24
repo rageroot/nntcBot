@@ -72,7 +72,7 @@ module.exports.info = () => {
 			case 0:
 				currentState = "Сегодня выходной";
 				break;
-			case 6:				//для субботы
+			case 8:				//заглушка для субботы
 				break;
 			default:			//рабочая неделя
 				for(let i = 0; i < markupTime.length; ++i){			//смотрим какое сейчас событие
