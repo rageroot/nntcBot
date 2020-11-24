@@ -39,13 +39,14 @@ const action = async (userId, userName, action) => {
         'Статус Jitsi: /jh',
         'Открыть ВЦ: /open_vc',
         'Открыть мастерские: /open_m',
-  //      'Самооценка: /myself',
+        'Самооценка: /myself',
     ].join('\n');
 
     const MYSELF_MENU_L1 = [
         'Самооценка:',
         'Просмотр: /myselfList',
         'Добавить: /myselfNew',
+        'Очистить: /myselfClear'
     ].join('\n');
 
     const ACTION = (action) ? action : '*';
@@ -67,10 +68,12 @@ const action = async (userId, userName, action) => {
             return await otkrivator.openMasterskie();
         case 'myself':
             return MYSELF_MENU_L1;
-//        case 'myselfList':
-//            return myself.list(userId, userName);
-//        case 'myselfNew':
-//            return myself.new(userId, userName);
+        case 'myselfList':
+            return myself.list(userId, userName);
+        case 'myselfNew':
+            return 'Что ты сдела, дружочек? Напиши\n Дело: %whatYourDo%';
+        case 'myselfClear':
+            return myself.clear(userId);
 //        case 'voice':
 //            return easterEggs.getEgg(userId, userName, 'voice');
         case '*':
@@ -106,23 +109,32 @@ bot.command('open_m', async (ctx) => {
     ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'open_m'));
 });
 
-bot.on('message', (ctx) => {
-    ctx.reply('dgf');
+bot.command('myself', async (ctx) => {
+    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'myself'));
 });
 
-//bot.command('myself', async (ctx) => {
-//    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'myself'));
-//});
+bot.command('myselfList', async (ctx) => {
+    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'myselfList'));
+});
 
-//bot.command('myselfList', async (ctx) => {
-//    ctx.replyWithMarkdown(await action(ctx.from.id.toString(), ctx.from.first_name, 'myselfList'));
-//});
+bot.command('myselfNew', async (ctx) => {
+    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'myselfNew'));
+});
 
-//bot.command('myselfNew', async (ctx) => {
-//    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'myselfNew'));
-//});
+bot.command('myselfClear', async (ctx) => {
+    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'myselfClear'));
+});
 
-
+//если в сообщении будет подходящий шаблон, то выполняем соотвествующие действия
+bot.on('text', async (ctx) => {
+    if(ctx.message.text.startsWith('Дело:')){
+        ctx.reply(await myself.new(ctx.from.id.toString(), ctx.from.first_name, ctx.message.text.slice(5).trim()));
+    }
+    else {
+        ctx.reply('Приветствую, друг! Введи команду /start и мы начнем');
+    }
+});
+//ctx.message.text
 // dfl
 // bot.start((ctx) => ctx.reply('Welcome'));
 // bot.help((ctx) => ctx.reply('Send me a sticker'));

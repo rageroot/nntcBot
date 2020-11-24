@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "https-proxy-agent": "^5.0.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
     "telegraf": "^3.38.0"
   }
 }
