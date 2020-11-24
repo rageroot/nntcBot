@@ -21,7 +21,7 @@ const bot = new Telegraf(cfg.TG_TOKEN);
 
 // ######## Middleware ###########
 
-bot.use(async (ctx, next) => {
+bot.use(async (ctx, next) => { //показывает время выполнения команды
     const start = new Date();
     await next();
     const ms  = new Date() - start;
@@ -78,6 +78,8 @@ const action = async (userId, userName, action) => {
 //            return easterEggs.getEgg(userId, userName, 'voice');
         case '*':
             return 'test';
+        default:
+            return WELCOME_MESSAGE;
     }
 
 };
