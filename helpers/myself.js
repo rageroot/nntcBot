@@ -14,7 +14,8 @@ module.exports.list = (userId, userName) => {
 
     toDoList.unshift(userName + ", ты успел натворить:");
     message = toDoList.join('\n');
-    return message;
+    return new Promise( resolve=>{
+        resolve(message)});
 };
 
 module.exports.new = (userId, userName, business) => {
@@ -25,25 +26,29 @@ module.exports.new = (userId, userName, business) => {
     try {
         const file =  fs.readFileSync(filename);
         toDoList = JSON.parse(file);
-        toDoList.push(business);
+        toDoList.push(toDoList.length.toString() + " " + business);
         fs.writeFileSync(filename, JSON.stringify(toDoList), 'utf8');
     }
     catch (err){
-        toDoList.push(business);
+        toDoList.push("0 " + business);
         fs.writeFileSync(filename, JSON.stringify(toDoList), 'utf8');
     }
     message = userName + ", твое дело учтено!";
-    return message;
+    return new Promise( resolve=>{
+        resolve(message)});
 };
 
-module.exports.clear = (userId) => { //просто удаляет файл
+module.exports.clear =  (userId) => { //просто удаляет файл
     const filename = './myself_lists/' + userId + '.txt';
-    let message = "Нет у вас больше дел";
-    try {
-        fs.unlinkSync(filename);
-    }
-    catch (err){
-        message = "Что то пошло не так";
-    }
-    return message;
+        let message = "Нет у вас больше дел";
+
+        try {
+            fs.unlinkSync(filename);
+        }
+        catch (err){
+            message = "Что то пошло не так";
+        }
+
+    return new Promise( resolve=>{
+        resolve(message)});
 }
