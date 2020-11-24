@@ -30,7 +30,9 @@ bot.use(async (ctx, next) => {
 
 // ######## Middleware ###########
 
-
+bot.on('text', (ctx) => {
+    return ctx.reply(`${ctx.message.from.username}`)
+})
 
 
 const action = async (userId, userName, action) => {
