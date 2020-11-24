@@ -30,11 +30,6 @@ bot.use(async (ctx, next) => {
 
 // ######## Middleware ###########
 
-bot.on('message', (ctx) => {
-    ctx.reply('dgf');
-});
-
-
 const action = async (userId, userName, action) => {
     const ACCESS_DENIED_MESSAGE = userName + ', Вам доступ запрещён. Сообщите ваш ID для добавления полномочий: ' + userId;
     const WELCOME_MESSAGE = [
@@ -87,7 +82,6 @@ const action = async (userId, userName, action) => {
 bot.start(async (ctx) => {
     ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'start'));
 });
-
 //bot.hears('голос!', async (ctx) => {
 //    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'voice'));
 //});
@@ -110,6 +104,10 @@ bot.command('jh', async (ctx) => {
 
 bot.command('open_m', async (ctx) => {
     ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'open_m'));
+});
+
+bot.on('message', (ctx) => {
+    ctx.reply('dgf');
 });
 
 //bot.command('myself', async (ctx) => {
