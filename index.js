@@ -18,14 +18,33 @@ const menu = require('./helpers/menu');
 });*/
 
 const bot = new Telegraf(cfg.TG_TOKEN);
-
+const addCase = {};
+/*
+* addCase - буфер, помогающий определить цель следующего сообщения- обработать как текст или записать в список дел
+* Считаем, что пользователь может передумать вводить новое дело и забьет другую команду, в таком случае
+* middlewares пометит свойство объекта == id пользователя на удаление и удалит при следующем вводе.
+* Защита от сучайного срабатывания
+* */
 // ######## Middleware ###########
 
-bot.use(async (ctx, next) => {
+bot.use(async (ctx, next) => { //скорость выполнения запросов
     const start = new Date();
     await next();
     const ms  = new Date() - start;
-    ctx.reply(`Запрос выполнен за ${ms} мс`);
+   ctx.reply(`Запрос выполнен за ${ms} мс`);
+});
+
+bot.use(async (ctx, next) => {  //Защита от случайного срабатываия записи дел
+    const userId = ctx.from.id.toString();
+    if(userId in addCase){
+        if(addCase[userId] == true){
+           delete addCase[userId];
+        }
+        else{
+            addCase[userId] = true;
+        }
+    }
+    await next();
 });
 
 // ######## Middleware ###########
@@ -47,6 +66,12 @@ const action = async (userId, userName, action) => {
         'Просмотр: /myselfList',
         'Добавить: /myselfNew',
         'Очистить: /myselfClear'
+    ].join('\n');
+
+    const HELP_MESSAGE = [
+        'Для начала работы введите команду /start',
+        'Чтобы быстро добавить дело введи:',
+        'Дело: %whatYourDo%'
     ].join('\n');
 
     const ACTION = (action) ? action : '*';
@@ -71,19 +96,24 @@ const action = async (userId, userName, action) => {
         case 'myselfList':
             return await myself.list(userId, userName);
         case 'myselfNew':
-            return 'Что ты сдела, дружочек? Напиши\n Дело: %whatYourDo%';
+            addCase[userId] = false;
+            return 'Что ты сделал, дружочек?';
         case 'myselfClear':
             return await myself.clear(userId);
 //        case 'voice':
 //            return easterEggs.getEgg(userId, userName, 'voice');
-        case '*':
-            return 'test';
+        case 'help':
+            return HELP_MESSAGE;
     }
 
 };
 
 bot.start(async (ctx) => {
     ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'start'));
+});
+
+bot.help(async (ctx) => {
+    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'help'));
 });
 //bot.hears('голос!', async (ctx) => {
 //    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'voice'));
@@ -128,13 +158,20 @@ bot.command('myselfClear',  async (ctx) => {
 
 //если в сообщении будет подходящий шаблон, то выполняем соотвествующие действия
 bot.on('text', async (ctx) => {
-    if(ctx.message.text.startsWith('Дело:')){
-        ctx.reply(await myself.new(ctx.from.id.toString(), ctx.from.first_name, ctx.message.text.slice(5).trim()));
-    } else {
-        if (ctx.message.text === "Торжественно клянусь, что хочу стать бездельником и забыть все былые поступки! Раминь!") {
-            ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'myselfClear'));
+    const userId = ctx.from.id.toString();
+    if(userId in addCase) {
+        delete addCase[userId];
+        ctx.reply(await myself.new(userId, ctx.from.first_name, ctx.message.text.trim()));
+    }
+    else{
+        if (ctx.message.text.startsWith('Дело:')) {
+            ctx.reply(await myself.new(userId, ctx.from.first_name, ctx.message.text.slice(5).trim()));
         } else {
-            ctx.reply('Приветствую, друг! Введи команду /start и мы начнем');
+            if (ctx.message.text === "Торжественно клянусь, что хочу стать бездельником и забыть все былые поступки! Раминь!") {
+                ctx.reply(await action(userId, ctx.from.first_name, 'myselfClear'));
+            } else {
+                ctx.reply('Приветствую, друг! Введи команду /start и мы начнем');
+            }
         }
     }
 });
