@@ -25,13 +25,25 @@ const addCase = {};
 * middlewares пометит свойство объекта == id пользователя на удаление и удалит при следующем вводе.
 * Защита от сучайного срабатывания
 * */
+
+const DELETE = "Воу, дружочек, у тебя серьезные намерения.\n Если хочешь забыть все, что было- напиши:\n " +
+    "Торжественно клянусь, что хочу стать бездельником и забыть все былые поступки! Раминь!";
+const CONFIRM_DELETE = "Торжественно клянусь, что хочу стать бездельником и забыть все былые поступки! Раминь!";
+
+let userId;
+let userName;
 // ######## Middleware ###########
+bot.use(async (ctx, next) => { //установка значений id и имени пользователя
+    userId = ctx.from.id.toString();
+    userName = ctx.from.first_name;
+    await next();
+});
 
 bot.use(async (ctx, next) => { //скорость выполнения запросов
     const start = new Date();
     await next();
     const ms  = new Date() - start;
-   ctx.reply(`Запрос выполнен за ${ms} мс`);
+ //  ctx.reply(`Запрос выполнен за ${ms} мс`);
 });
 
 bot.use(async (ctx, next) => {  //Защита от случайного срабатываия записи дел
@@ -49,7 +61,7 @@ bot.use(async (ctx, next) => {  //Защита от случайного сра�
 
 // ######## Middleware ###########
 
-const action = async (userId, userName, action) => {
+const action = async (action) => {
     const ACCESS_DENIED_MESSAGE = userName + ', Вам доступ запрещён. Сообщите ваш ID для добавления полномочий: ' + userId;
     const WELCOME_MESSAGE = [
         'Добро пожаловать, ' + userName,
@@ -109,11 +121,11 @@ const action = async (userId, userName, action) => {
 };
 
 bot.start(async (ctx) => {
-    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'start'));
+    await ctx.reply(await action('start'));
 });
 
 bot.help(async (ctx) => {
-    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'help'));
+    await ctx.reply(await action('help'));
 });
 //bot.hears('голос!', async (ctx) => {
 //    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'voice'));
@@ -124,53 +136,51 @@ bot.help(async (ctx) => {
 //});
 
 bot.command('open_vc', async (ctx) => {
-    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'open_vc'));
+    await ctx.reply(await action('open_vc'));
 });
 
 bot.command('bells', async (ctx) => {
-    ctx.replyWithHTML(await action(ctx.from.id.toString(), ctx.from.first_name, 'bells'));
+    await ctx.replyWithHTML(await action( 'bells'));
 });
 
 bot.command('jh', async (ctx) => {
-    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'jh'));
+    await ctx.reply(await action( 'jh'));
 });
 
 bot.command('open_m', async (ctx) => {
-    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'open_m'));
+    await ctx.reply(await action('open_m'));
 });
 
 bot.command('myself', async (ctx) => {
-    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'myself'));
+    await ctx.reply(await action( 'myself'));
 });
 
 bot.command('myselfList', async (ctx) => {
-    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'myselfList'));
+    await ctx.reply(await action('myselfList'));
 });
 
 bot.command('myselfNew', async (ctx) => {
-    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'myselfNew'));
+    await ctx.reply(await action('myselfNew'));
 });
 
 bot.command('myselfClear',  async (ctx) => {
-    ctx.reply("Воу, дружочек, у тебя серьезные намерения.\n Если хочешь забыть все, что было- напиши:\n " +
-        "Торжественно клянусь, что хочу стать бездельником и забыть все былые поступки! Раминь!");
+    await ctx.reply(DELETE);
 });
 
 //если в сообщении будет подходящий шаблон, то выполняем соотвествующие действия
 bot.on('text', async (ctx) => {
-    const userId = ctx.from.id.toString();
-    if(userId in addCase) {
+    if(userId in addCase) {     //Если бот предложил пользователю ввести дело, то в объекте будет свойство == id
         delete addCase[userId];
-        ctx.reply(await myself.new(userId, ctx.from.first_name, ctx.message.text.trim()));
+        await ctx.reply(await myself.new(userId, userName, ctx.message.text.trim()));
     }
     else{
         if (ctx.message.text.startsWith('Дело:')) {
-            ctx.reply(await myself.new(userId, ctx.from.first_name, ctx.message.text.slice(5).trim()));
+            await ctx.reply(await myself.new(userId, userName, ctx.message.text.slice(5).trim()));
         } else {
-            if (ctx.message.text === "Торжественно клянусь, что хочу стать бездельником и забыть все былые поступки! Раминь!") {
-                ctx.reply(await action(userId, ctx.from.first_name, 'myselfClear'));
+            if (ctx.message.text == CONFIRM_DELETE) {
+                await ctx.reply(await action('myselfClear'));
             } else {
-                ctx.reply('Приветствую, друг! Введи команду /start и мы начнем');
+                await ctx.reply('Приветствую, друг! Введи команду /start и мы начнем');
             }
         }
     }

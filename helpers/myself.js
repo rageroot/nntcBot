@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-module.exports.list = (userId, userName) => {
+module.exports.list = async (userId, userName) => {
     const filename = './myself_lists/' + userId + '.txt';
     let message = "";
     let toDoList = [];
@@ -18,7 +18,7 @@ module.exports.list = (userId, userName) => {
         resolve(message)});
 };
 
-module.exports.new = (userId, userName, business) => {
+module.exports.new = async (userId, userName, business) => {
     const filename = './myself_lists/' + userId + '.txt';
     let message = "";
     let toDoList = [];
@@ -38,7 +38,7 @@ module.exports.new = (userId, userName, business) => {
         resolve(message)});
 };
 
-module.exports.clear =  (userId) => { //просто удаляет файл
+module.exports.clear =  async (userId) => { //просто удаляет файл
     const filename = './myself_lists/' + userId + '.txt';
         let message = "Нет у вас больше дел";
 
