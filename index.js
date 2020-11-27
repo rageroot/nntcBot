@@ -51,7 +51,7 @@ bot.use(async (ctx, next) => { //скорость выполнения запр�
 bot.use(async (ctx, next) => {  //Защита от случайного срабатываия записи дел
     const userId = ctx.from.id.toString();
     if(userId in addCase){
-        if(addCase[userId] == true){
+        if(addCase[userId] === true){
            delete addCase[userId];
         }
         else{
@@ -75,21 +75,12 @@ const action = async (action) => {
         'Очистить: /myselfClear'
     ].join('\n');
 
-    const HELP_MESSAGE = [
-        'Для начала работы введите команду /start',
-        'Чтобы быстро добавить дело введи:',
-        'Д: %whatYourDo%'
-    ].join('\n');
-
-    const ACTION = (action) ? action : '*';
     // check access
     if (cfg.VALID_USERS.indexOf(userId) === -1) {
         return ACCESS_DENIED_MESSAGE;
     }
 
     switch (action) {
-      /*  case 'start':
-            return WELCOME_MESSAGE;*/
         case 'open_vc':
             return await otkrivator.openItPark();
         case 'bells':
@@ -98,8 +89,6 @@ const action = async (action) => {
             return userName + ', ' + await jitsi.health();
         case 'open_m':
             return await otkrivator.openMasterskie();
-        case 'myself':
-            return MYSELF_MENU_L1;
         case 'myselfList':
             return await myself.list(userId, userName);
         case 'myselfNew':
@@ -109,8 +98,6 @@ const action = async (action) => {
             return await myself.clear(userId);
 //        case 'voice':
 //            return easterEggs.getEgg(userId, userName, 'voice');
-       /* case 'help':
-            return HELP_MESSAGE;*/
     }
 
 };
@@ -130,18 +117,21 @@ async function hello(ctx){
     });
 }
 
+async function mySelfMenu(ctx){
+    await ctx.telegram.sendMessage(ctx.chat.id,'Меню самооценки:',
+         Markup.inlineKeyboard(
+             [[ Markup.callbackButton('Список выполненных дел', 'myselfList')],
+             [Markup.callbackButton('Добавить новое дело', 'myselfNew')],
+             [Markup.callbackButton('Очистить список дел', 'myselfClear')],
+             ]).extra());
+}
+
 bot.start(async (ctx) => {
     await hello(ctx);
-    //await ctx.reply(await action('start'));
 });
 
 bot.help( async (ctx) => {
     await hello(ctx);
-     //console.log(Markup);
-     /*await ctx.telegram.sendMessage(ctx.chat.id,'Help keyboard',
-         Markup.inlineKeyboard([ Markup.callbackButton('/start', '/bells')]).extra());*/
-    //await ctx.reply(await action('help'));
-
 });
 //bot.hears('голос!', async (ctx) => {
 //    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'voice'));
@@ -168,19 +158,8 @@ bot.command('open_m', async (ctx) => {
 });
 
 bot.hears('Листы самооценки', async (ctx) => {
-    await ctx.reply(await action( 'myself'));
-});
-
-bot.command('myselfList', async (ctx) => {
-    await ctx.reply(await action('myselfList'));
-});
-
-bot.command('myselfNew', async (ctx) => {
-    await ctx.reply(await action('myselfNew'));
-});
-
-bot.command('myselfClear',  async (ctx) => {
-    await ctx.reply(DELETE);
+    // await ctx.reply(await action( 'myself'));
+    await mySelfMenu(ctx);
 });
 
 //если в сообщении будет подходящий шаблон, то выполняем соотвествующие действия
@@ -202,8 +181,19 @@ bot.on('text', async (ctx) => {
     }
 });
 
+//обработка команд с inline клавиатуры
 bot.on('callback_query', async (ctx) =>{
     const callbackQuery =  ctx.callbackQuery.data;
-    await ctx.replyWithHTML(await action( 'bells'));
+    switch (callbackQuery){
+        case 'myselfList':
+            await ctx.reply(await action('myselfList'));
+            break;
+        case 'myselfNew':
+            await ctx.reply(await action('myselfNew'));
+            break;
+        case 'myselfClear':
+            await ctx.reply(DELETE);
+            break;
+    }
 });
 bot.launch();
