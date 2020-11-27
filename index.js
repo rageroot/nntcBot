@@ -1,6 +1,8 @@
-const Telegraf = require('telegraf');
+const {Telegraf} = require('telegraf');
+const {Markup} = require('telegraf');
 
-const HttpsProxyAgent = require('https-proxy-agent');
+
+//const HttpsProxyAgent = require('https-proxy-agent');
 
 const cfg = require('./helpers/config');
 const otkrivator = require('./helpers/otkrivator');
@@ -9,7 +11,7 @@ const bells = require('./helpers/bells');
 const myself = require('./helpers/myself');
 const easterEggs = require('./helpers/easterEggs');
 const kursGen = require('./helpers/wizard-kurs-report-generator');
-const menu = require('./helpers/menu');
+
 
 /*const bot = new Telegraf(cfg.TG_TOKEN, {
     telegram: {
@@ -59,19 +61,12 @@ bot.use(async (ctx, next) => {  //Защита от случайного сра�
     await next();
 });
 
+//bot.use(Telegraf.log());
+
 // ######## Middleware ###########
 
 const action = async (action) => {
     const ACCESS_DENIED_MESSAGE = userName + ', Вам доступ запрещён. Сообщите ваш ID для добавления полномочий: ' + userId;
-    const WELCOME_MESSAGE = [
-        'Добро пожаловать, ' + userName,
-        'Действия:',
-        'Расписание звонков: /bells',
-        'Статус Jitsi: /jh',
-        'Открыть ВЦ: /open_vc',
-        'Открыть мастерские: /open_m',
-        'Самооценка: /myself',
-    ].join('\n');
 
     const MYSELF_MENU_L1 = [
         'Самооценка:',
@@ -83,7 +78,7 @@ const action = async (action) => {
     const HELP_MESSAGE = [
         'Для начала работы введите команду /start',
         'Чтобы быстро добавить дело введи:',
-        'Дело: %whatYourDo%'
+        'Д: %whatYourDo%'
     ].join('\n');
 
     const ACTION = (action) ? action : '*';
@@ -93,8 +88,8 @@ const action = async (action) => {
     }
 
     switch (action) {
-        case 'start':
-            return WELCOME_MESSAGE;
+      /*  case 'start':
+            return WELCOME_MESSAGE;*/
         case 'open_vc':
             return await otkrivator.openItPark();
         case 'bells':
@@ -114,18 +109,39 @@ const action = async (action) => {
             return await myself.clear(userId);
 //        case 'voice':
 //            return easterEggs.getEgg(userId, userName, 'voice');
-        case 'help':
-            return HELP_MESSAGE;
+       /* case 'help':
+            return HELP_MESSAGE;*/
     }
 
 };
 
+async function hello(ctx){
+    const WELCOME_MESSAGE = [
+        'Добро пожаловать, ' + userName,
+        'Чтобы быстро добавить дело введи:',
+        'Д: %whatYourDo%',
+        'Или выбери действие:',
+    ].join('\n');
+
+    await ctx.telegram.sendMessage(ctx.chat.id, WELCOME_MESSAGE, {
+        "reply_markup": {
+            "keyboard": [["Расписание звонков", "Статут Jitsi"],   ["Открыть ВЦ", "Листы самооценки"]]
+        }
+    });
+}
+
 bot.start(async (ctx) => {
-    await ctx.reply(await action('start'));
+    await hello(ctx);
+    //await ctx.reply(await action('start'));
 });
 
-bot.help(async (ctx) => {
-    await ctx.reply(await action('help'));
+bot.help( async (ctx) => {
+    await hello(ctx);
+     //console.log(Markup);
+     /*await ctx.telegram.sendMessage(ctx.chat.id,'Help keyboard',
+         Markup.inlineKeyboard([ Markup.callbackButton('/start', '/bells')]).extra());*/
+    //await ctx.reply(await action('help'));
+
 });
 //bot.hears('голос!', async (ctx) => {
 //    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'voice'));
@@ -135,15 +151,15 @@ bot.help(async (ctx) => {
 //    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'voice'));
 //});
 
-bot.command('open_vc', async (ctx) => {
+bot.hears('Открыть ВЦ', async (ctx) => {
     await ctx.reply(await action('open_vc'));
 });
 
-bot.command('bells', async (ctx) => {
+bot.hears('Расписание звонков', async (ctx) => {
     await ctx.replyWithHTML(await action( 'bells'));
 });
 
-bot.command('jh', async (ctx) => {
+bot.hears('Статут Jitsi', async (ctx) => {
     await ctx.reply(await action( 'jh'));
 });
 
@@ -151,7 +167,7 @@ bot.command('open_m', async (ctx) => {
     await ctx.reply(await action('open_m'));
 });
 
-bot.command('myself', async (ctx) => {
+bot.hears('Листы самооценки', async (ctx) => {
     await ctx.reply(await action( 'myself'));
 });
 
@@ -174,26 +190,20 @@ bot.on('text', async (ctx) => {
         await ctx.reply(await myself.new(userId, userName, ctx.message.text.trim()));
     }
     else{
-        if (ctx.message.text.startsWith('Дело:')) {
+        if (ctx.message.text.startsWith('Д:')) {
             await ctx.reply(await myself.new(userId, userName, ctx.message.text.slice(5).trim()));
         } else {
-            if (ctx.message.text == CONFIRM_DELETE) {
+            if (ctx.message.text === CONFIRM_DELETE) {
                 await ctx.reply(await action('myselfClear'));
             } else {
-                await ctx.reply('Приветствую, друг! Введи команду /start и мы начнем');
+                await hello(ctx);
             }
         }
     }
 });
-//ctx.message.text
-// dfl
-// bot.start((ctx) => ctx.reply('Welcome'));
-// bot.help((ctx) => ctx.reply('Send me a sticker'));
-// bot.on('sticker', (ctx) => ctx.reply('👍'));
-// bot.hears('hi', (ctx) => ctx.reply('Hey there'));
-// bot.hears('Ебот?', (ctx) => ctx.reply('Да, я тут. Твои возможности: /new'));
-// bot.hears('/new', (ctx) => ctx.reply('Ага'));
 
-// kursGen.init(bot);
-
+bot.on('callback_query', async (ctx) =>{
+    const callbackQuery =  ctx.callbackQuery.data;
+    await ctx.replyWithHTML(await action( 'bells'));
+});
 bot.launch();
