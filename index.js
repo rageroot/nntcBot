@@ -96,6 +96,8 @@ const action = async (action) => {
             return 'Что ты сделал, дружочек?';
         case 'myselfClear':
             return await myself.clear(userId);
+        case 'myselfFile':
+            return await myself.file(userId, userName);
 //        case 'voice':
 //            return easterEggs.getEgg(userId, userName, 'voice');
     }
@@ -123,6 +125,7 @@ async function mySelfMenu(ctx){
              [[ Markup.callbackButton('Список выполненных дел', 'myselfList')],
              [Markup.callbackButton('Добавить новое дело', 'myselfNew')],
              [Markup.callbackButton('Очистить список дел', 'myselfClear')],
+             [Markup.callbackButton('Выгрузить файлом', 'myselfFile')],
              ]).extra());
 }
 
@@ -155,6 +158,10 @@ bot.hears('Статут Jitsi', async (ctx) => {
 
 bot.command('open_m', async (ctx) => {
     await ctx.reply(await action('open_m'));
+});
+
+bot.command('ref', async (ctx) => {
+    await ctx.reply(await myself.refactor(cfg.VALID_USERS));
 });
 
 bot.hears('Листы самооценки', async (ctx) => {
@@ -193,6 +200,9 @@ bot.on('callback_query', async (ctx) =>{
             break;
         case 'myselfClear':
             await ctx.reply(DELETE);
+            break;
+        case 'myselfFile':
+            await ctx.reply(await action('myselfFile'));
             break;
     }
 });

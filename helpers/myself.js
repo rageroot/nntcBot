@@ -7,15 +7,15 @@ module.exports.list = async (userId, userName) => {
     try {
         const file =  fs.readFileSync(filename);
         toDoList = JSON.parse(file);
+        toDoList = botDecorator(toDoList);
 
     }catch (err){
         message = "Неизвестная ошибка";
     }
 
     toDoList.unshift(userName + ", ты успел натворить:");
-    message = toDoList.join('\n');
     return new Promise( resolve=>{
-        resolve(message)});
+        resolve(toDoList.join('\n'))});
 };
 
 module.exports.new = async (userId, userName, business) => {
@@ -26,11 +26,11 @@ module.exports.new = async (userId, userName, business) => {
     try {
         const file =  fs.readFileSync(filename);
         toDoList = JSON.parse(file);
-        toDoList.push(toDoList.length.toString() + " " + business);
+        toDoList.push(business);
         fs.writeFileSync(filename, JSON.stringify(toDoList), 'utf8');
     }
     catch (err){
-        toDoList.push("0 " + business);
+        toDoList.push(business);
         fs.writeFileSync(filename, JSON.stringify(toDoList), 'utf8');
     }
     message = userName + ", твое дело учтено!";
@@ -51,4 +51,46 @@ module.exports.clear =  async (userId) => { //просто удаляет фай
 
     return new Promise( resolve=>{
         resolve(message)});
+}
+
+module.exports.refactor = async (users) => {
+    const message = [];
+    users.forEach(user => {
+        const filename = './myself_lists/' + user + '.txt';
+
+        try {
+            const file =  fs.readFileSync(filename);
+            let toDoList = JSON.parse(file);
+            toDoList = toDoList.map(unit => {
+                return unit.substring(unit.indexOf(' ', 0)).trim();
+            });
+            fs.writeFileSync(filename, JSON.stringify(toDoList), 'utf8');
+            message.push(`${user} ИЗМЕНЕН`);
+        }
+        catch (err){
+            message.push(`${user} не имеет файла`);
+        }
+
+    });
+    return new Promise( resolve=>{
+        resolve(message.join('\n'))});
+
+}
+
+module.exports.file = async (userId, userName) => {
+    return "Когда то это будет работать. Наверно. Не точно.";
+}
+
+/*Декораторы для вывода в файл и в бота*/
+function botDecorator(affairs){
+    let i = 1;
+    return affairs.map((affair) => {
+        return `${i++}- ${affair}`;
+    });
+}
+
+function fileDecorator(affairs){
+    return affairs.map((affair) => {
+        return `- ${affair}`;
+    });
 }
