@@ -53,8 +53,9 @@ module.exports.clear =  async (userId) => { //просто удаляет фай
         resolve(message)});
 }
 
+//Требовался только один раз, по этому заглушка
 module.exports.refactor = async (users) => {
-    const message = [];
+    /*const message = [];
     users.forEach(user => {
         const filename = './myself_lists/' + user + '.txt';
 
@@ -73,7 +74,8 @@ module.exports.refactor = async (users) => {
 
     });
     return new Promise( resolve=>{
-        resolve(message.join('\n'))});
+        resolve(message.join('\n'))});*/
+    return "Заглушка";
 
 }
 
