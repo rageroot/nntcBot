@@ -1,4 +1,5 @@
 const fs = require('fs');
+const child_process = require('child_process');
 
 module.exports.list = async (userId, userName) => {
     const filename = './myself_lists/' + userId + '.txt';
@@ -79,10 +80,55 @@ module.exports.refactor = async (users) => {
 
 }
 
-module.exports.file = async (userId, userName) => {
-    return "Когда то это будет работать. Наверно. Не точно.";
+module.exports.file = async (userId) => { //находимся в корне проекта
+    const tmpPath = `tmp/${userId}_self`; //здесь разобраный шаблон одт
+    const filename = './myself_lists/' + userId + '.txt'; //здесь лежат наши важные дела
+    const tmpFile = `./${tmpPath}/content.xml`; //файл с текстовым содержимым одт
+    let toDoList = [];  //массив, где я формирую будущую верстку
+
+    try {
+        child_process.execSync(`mkdir ${tmpPath}`)  //создаю папку
+        child_process.execSync(`cp -r odt_templates/myself/* ${tmpPath}`); //скопировать шаблон для работы
+    }
+    catch (err){
+        return 'Возникли проблемы на файловой системе'
+    }
+
+    try {   //получаю список дел и декорирую их под файл
+        const file =  fs.readFileSync(filename);
+        toDoList = JSON.parse(file);
+        toDoList = fileDecorator(toDoList); //формирую правильную верстку для одт
+        toDoList.push("</office:text></office:body></office:document-content>");
+        //console.log(toDoList);
+    }catch (err){
+        return "Нет самооценки";
+    }
+
+    try{    //Запаковываю в файл шаблона новое содержимое
+        let tmpFileContent =  fs.readFileSync(tmpFile); //считываю содержимое файла
+        tmpFileContent += toDoList.join("");    //дополняю
+        fs.writeFileSync(tmpFile, tmpFileContent, 'utf8');  //засовываю новое содержимое
+    }
+    catch (err){
+        return "Нет файла шаблона"
+    }
+
+    try {
+        child_process.execSync(`cd ${tmpPath}; zip -0 -r ../myself_${userId}.odt *`); //собираю одт
+    }
+    catch (err){
+        return "Ошибка упаковки файла";
+    }
+
+    return `tmp/myself_${userId}.odt`;  //отдаю путь к файлу, для дальнейшей работы
 }
 
+module.exports.garbageCollector = async (userId) => { //Сборка мусора после вывода файла самооценки
+    const tmpPath = `tmp/${userId}_self`; //здесь разобраный шаблон одт
+    const tmpFile = `tmp/myself_${userId}.odt`;
+    child_process.execSync(`rm -rf ${tmpPath} ${tmpFile}`);
+}
+//Запаковать: zip file.odt -r *
 /*Декораторы для вывода в файл и в бота*/
 function botDecorator(affairs){
     let i = 1;
@@ -92,7 +138,19 @@ function botDecorator(affairs){
 }
 
 function fileDecorator(affairs){
+    let i = 1;
     return affairs.map((affair) => {
-        return `- ${affair}`;
+        return `<text:p text:style-name="P${i++}">-${affair}</text:p>`; //одтшная верстка
     });
 }
+
+/*
+<text:p text:style-name="P1">Myself</text:p><text:p text:style-name="P2">123123</text:p>
+<text:p text:style-name="P3">123123</text:p></office:text></office:body></office:document-content>
+
+*
+
+*
+*
+* */
+

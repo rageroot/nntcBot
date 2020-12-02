@@ -97,7 +97,7 @@ const action = async (action) => {
         case 'myselfClear':
             return await myself.clear(userId);
         case 'myselfFile':
-            return await myself.file(userId, userName);
+            return await myself.file(userId);
 //        case 'voice':
 //            return easterEggs.getEgg(userId, userName, 'voice');
     }
@@ -114,7 +114,7 @@ async function hello(ctx){
 
     await ctx.telegram.sendMessage(ctx.chat.id, WELCOME_MESSAGE, {
         "reply_markup": {
-            "keyboard": [["Расписание звонков", "Статут Jitsi"],   ["Открыть ВЦ", "Листы самооценки"]]
+            "keyboard": [["Расписание звонков", "Статус онлайн конференций"],   ["Открыть ВЦ", "Листы самооценки"]]
         }
     });
 }
@@ -152,7 +152,7 @@ bot.hears('Расписание звонков', async (ctx) => {
     await ctx.replyWithHTML(await action( 'bells'));
 });
 
-bot.hears('Статут Jitsi', async (ctx) => {
+bot.hears('Статус онлайн конференций', async (ctx) => {
     await ctx.reply(await action( 'jh'));
 });
 
@@ -202,8 +202,22 @@ bot.on('callback_query', async (ctx) =>{
             await ctx.reply(DELETE);
             break;
         case 'myselfFile':
-            await ctx.reply(await action('myselfFile'));
+            const request = await action('myselfFile');
+            if(request.startsWith("Ошибка")){
+                await ctx.reply(request);
+            }
+            else {
+              await ctx.replyWithDocument({source: request}); //выплевывает файл в чат
+            }
+            await myself.garbageCollector(userId); //сборка мусора
             break;
     }
 });
 bot.launch();
+
+
+/*
+* Запаковать: zip file.odt -r *
+  Распаковать в директорию: unzip template.odt -d e
+*
+* */
