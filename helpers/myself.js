@@ -2,56 +2,55 @@ const fs = require('fs');
 const child_process = require('child_process');
 
 module.exports.list = async (userId, userName) => {
-    const filename = './myself_lists/' + userId + '.txt';
-    let message = "";
-    let toDoList = [];
-    try {
-        const file =  fs.readFileSync(filename);
-        toDoList = JSON.parse(file);
-        toDoList = botDecorator(toDoList);
+    return new Promise( (resolve, reject)=>{
+        const filename = './myself_lists/' + userId + '.txt';
+        let toDoList = [];
 
-    }catch (err){
-        message = "Неизвестная ошибка";
-    }
+        fs.readFile(filename, (err, file) =>{
+            if(err){
+                reject(new Error("У вас нет самооценки"));
+            }
+            toDoList = JSON.parse(file);
+            toDoList = botDecorator(toDoList);
 
-    toDoList.unshift(userName + ", ты успел натворить:");
-    return new Promise( resolve=>{
-        resolve(toDoList.join('\n'))});
+            toDoList.unshift(userName + ", ты успел натворить:");
+            resolve(toDoList.join('\n'))
+        });
+    });
 };
 
 module.exports.new = async (userId, userName, business) => {
-    const filename = './myself_lists/' + userId + '.txt';
-    let message = "";
-    let toDoList = [];
+    return new Promise( (resolve, reject)=>{
+        const filename = './myself_lists/' + userId + '.txt';
+        let toDoList = [];
 
-    try {
-        const file =  fs.readFileSync(filename);
-        toDoList = JSON.parse(file);
-        toDoList.push(business);
-        fs.writeFileSync(filename, JSON.stringify(toDoList), 'utf8');
-    }
-    catch (err){
-        toDoList.push(business);
-        fs.writeFileSync(filename, JSON.stringify(toDoList), 'utf8');
-    }
-    message = userName + ", твое дело учтено!";
-    return new Promise( resolve=>{
-        resolve(message)});
+        fs.readFile(filename, (err, file) => {
+            if(err){
+                toDoList.push(business);
+            }else {
+                toDoList = JSON.parse(file);
+                toDoList.push(business);
+            }
+            fs.writeFile(filename, JSON.stringify(toDoList), (err) => {
+                if(err){
+                    reject(new Error("Не могу записать файл"))
+                }
+                resolve(userName + ", твое дело учтено!");
+            });
+        });
+    });
 };
 
 module.exports.clear =  async (userId) => { //просто удаляет файл
-    const filename = './myself_lists/' + userId + '.txt';
-        let message = "Нет у вас больше дел";
-
-        try {
-            fs.unlinkSync(filename);
-        }
-        catch (err){
-            message = "Что то пошло не так";
-        }
-
-    return new Promise( resolve=>{
-        resolve(message)});
+    return new Promise( (resolve, reject)=> {
+        const filename = './myself_lists/' + userId + '.txt';
+        fs.unlink(filename, (err) => {
+            if (err) {
+                reject(new Error("Не могу удалить файл"));
+            }
+            resolve("Нет у вас больше дел");
+        });
+    });
 }
 
 //Требовался только один раз, по этому заглушка
@@ -81,52 +80,55 @@ module.exports.refactor = async (users) => {
 }
 
 module.exports.file = async (userId) => { //находимся в корне проекта
-    const tmpPath = `tmp/${userId}_self`; //здесь разобраный шаблон одт
-    const filename = './myself_lists/' + userId + '.txt'; //здесь лежат наши важные дела
-    const tmpFile = `./${tmpPath}/content.xml`; //файл с текстовым содержимым одт
-    let toDoList = [];  //массив, где я формирую будущую верстку
+    return new Promise((resolve, reject) => {
+        const tmpPath = `tmp/${userId}_self`; //здесь разобраный шаблон одт
+        const filename = './myself_lists/' + userId + '.txt'; //здесь лежат наши важные дела
+        const tmpFile = `./${tmpPath}/content.xml`; //файл с текстовым содержимым одт
+        let toDoList = [];  //массив, где я формирую будущую верстку
 
-    try {
-        child_process.execSync(`mkdir ${tmpPath}`)  //создаю папку
-        child_process.execSync(`cp -r odt_templates/myself/* ${tmpPath}`); //скопировать шаблон для работы
-    }
-    catch (err){
-        return 'Возникли проблемы на файловой системе'
-    }
-
-    try {   //получаю список дел и декорирую их под файл
-        const file =  fs.readFileSync(filename);
-        toDoList = JSON.parse(file);
-        toDoList = fileDecorator(toDoList); //формирую правильную верстку для одт
-        toDoList.push("</office:text></office:body></office:document-content>");
-        //console.log(toDoList);
-    }catch (err){
-        return "Нет самооценки";
-    }
-
-    try{    //Запаковываю в файл шаблона новое содержимое
-        let tmpFileContent =  fs.readFileSync(tmpFile); //считываю содержимое файла
-        tmpFileContent += toDoList.join("");    //дополняю
-        fs.writeFileSync(tmpFile, tmpFileContent, 'utf8');  //засовываю новое содержимое
-    }
-    catch (err){
-        return "Нет файла шаблона"
-    }
-
-    try {
-        child_process.execSync(`cd ${tmpPath}; zip -0 -r ../myself_${userId}.odt *`); //собираю одт
-    }
-    catch (err){
-        return "Ошибка упаковки файла";
-    }
-
-    return `tmp/myself_${userId}.odt`;  //отдаю путь к файлу, для дальнейшей работы
+        fs.mkdir(tmpPath, (err) => {
+            if(err){
+                reject(new Error(`Не могу создать папку ${tmpPath}`));
+            }
+            child_process.exec(`cp -r odt_templates/myself/* ${tmpPath}`, (err) =>{
+                if(err){
+                    reject(new Error(`Не могу скопировать файл шаблонов`));
+                }
+                fs.readFile(filename, (err, data) => { //получаю список дел
+                    if (err) {
+                        reject(new Error("У вас нет самооценки"));
+                    }
+                    toDoList = JSON.parse(data);
+                    toDoList = fileDecorator(toDoList);   //декорирую под запись в файл
+                    toDoList.push("</office:text></office:body></office:document-content>");
+                    fs.readFile(tmpFile, (err, tmpFileContent) => { //запаковываю в файл шаблона новое содержимое
+                        if (err) {
+                            reject(new Error("Файл шаблона не был создан"));
+                        }
+                        tmpFileContent += toDoList.join("");
+                        fs.writeFile(tmpFile, tmpFileContent, (err) => {
+                            if (err) {
+                                reject(new Error( "Не могу создать файл =/"));
+                            }
+                            child_process.exec(`cd ${tmpPath}; zip -0 -r ../myself_${userId}.odt *`, (err) =>{ //упаковываю одт
+                                resolve(`tmp/myself_${userId}.odt`);
+                            });
+                        });  //отдаю путь к файлу, для дальнейшей работы*/
+                    });
+                });
+            });
+        });
+    });
 }
 
 module.exports.garbageCollector = async (userId) => { //Сборка мусора после вывода файла самооценки
     const tmpPath = `tmp/${userId}_self`; //здесь разобраный шаблон одт
     const tmpFile = `tmp/myself_${userId}.odt`;
-    child_process.execSync(`rm -rf ${tmpPath} ${tmpFile}`);
+    child_process.exec(`rm -rf ${tmpPath} ${tmpFile}`,(err) => {
+        if(err){
+            throw new Error("не могу собрать мусор");
+        }
+    });
 }
 //Запаковать: zip file.odt -r *
 /*Декораторы для вывода в файл и в бота*/
@@ -144,13 +146,4 @@ function fileDecorator(affairs){
     });
 }
 
-/*
-<text:p text:style-name="P1">Myself</text:p><text:p text:style-name="P2">123123</text:p>
-<text:p text:style-name="P3">123123</text:p></office:text></office:body></office:document-content>
-
-*
-
-*
-*
-* */
 

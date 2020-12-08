@@ -34,11 +34,23 @@ const CONFIRM_DELETE = "Торжественно клянусь, что хочу
 
 let userId;
 let userName;
+
 // ######## Middleware ###########
 bot.use(async (ctx, next) => { //установка значений id и имени пользователя
     userId = ctx.from.id.toString();
     userName = ctx.from.first_name;
     await next();
+});
+
+bot.use(async (ctx, next) => {  //отсекаю невалидных пользователей
+    const ACCESS_DENIED_MESSAGE = userName + ', Вам доступ запрещён. Сообщите ваш ID для добавления полномочий: ' + userId;
+
+    if (cfg.VALID_USERS.indexOf(userId) === -1) {
+        await ctx.reply(ACCESS_DENIED_MESSAGE);
+    }
+    else {
+        await next();
+    }
 });
 
 bot.use(async (ctx, next) => { //скорость выполнения запросов
@@ -65,44 +77,26 @@ bot.use(async (ctx, next) => {  //Защита от случайного сра�
 
 // ######## Middleware ###########
 
-const action = async (action) => {
-    const ACCESS_DENIED_MESSAGE = userName + ', Вам доступ запрещён. Сообщите ваш ID для добавления полномочий: ' + userId;
+/*async function test(){
+    let awaitPromise = new Promise(resolve => {
+        setTimeout(() => {
+            resolve("timeOut");
+        }, 2000);
+    });
+    console.log(await awaitPromise);
+    console.log("endOfFunction");
 
-    const MYSELF_MENU_L1 = [
-        'Самооценка:',
-        'Просмотр: /myselfList',
-        'Добавить: /myselfNew',
-        'Очистить: /myselfClear'
-    ].join('\n');
+    let promise = new Promise(resolve => {
+        setTimeout(() => {
+            resolve("ok");
+        }, 2000);
+        console.log("EndOfPtomise");
+    });
 
-    // check access
-    if (cfg.VALID_USERS.indexOf(userId) === -1) {
-        return ACCESS_DENIED_MESSAGE;
-    }
-
-    switch (action) {
-        case 'open_vc':
-            return await otkrivator.openItPark();
-        case 'bells':
-            return await bells.info();
-        case 'jh':
-            return userName + ', ' + await jitsi.health();
-        case 'open_m':
-            return await otkrivator.openMasterskie();
-        case 'myselfList':
-            return await myself.list(userId, userName);
-        case 'myselfNew':
-            addCase[userId] = false;
-            return 'Что ты сделал, дружочек?';
-        case 'myselfClear':
-            return await myself.clear(userId);
-        case 'myselfFile':
-            return await myself.file(userId);
-//        case 'voice':
-//            return easterEggs.getEgg(userId, userName, 'voice');
-    }
-
-};
+    promise.then(() => {
+        console.log("TimeOutProimise");
+    });
+}*/
 
 async function hello(ctx){
     const WELCOME_MESSAGE = [
@@ -112,7 +106,7 @@ async function hello(ctx){
         'Или выбери действие:',
     ].join('\n');
 
-    await ctx.telegram.sendMessage(ctx.chat.id, WELCOME_MESSAGE, {
+    await ctx.reply(WELCOME_MESSAGE, {
         "reply_markup": {
             "keyboard": [["Расписание звонков", "Статус онлайн конференций"],   ["Открыть ВЦ", "Листы самооценки"]]
         }
@@ -120,7 +114,7 @@ async function hello(ctx){
 }
 
 async function mySelfMenu(ctx){
-    await ctx.telegram.sendMessage(ctx.chat.id,'Меню самооценки:',
+    await ctx.reply('Меню самооценки:',
          Markup.inlineKeyboard(
              [[ Markup.callbackButton('Список выполненных дел', 'myselfList')],
              [Markup.callbackButton('Добавить новое дело', 'myselfNew')],
@@ -136,33 +130,32 @@ bot.start(async (ctx) => {
 bot.help( async (ctx) => {
     await hello(ctx);
 });
-//bot.hears('голос!', async (ctx) => {
-//    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'voice'));
-//});
 
 //bot.command('voice', async (ctx) => {
 //    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'voice'));
 //});
 
 bot.hears('Открыть ВЦ', async (ctx) => {
-    await ctx.reply(await action('open_vc'));
+    await ctx.reply(await otkrivator.openItPark());
 });
 
 bot.hears('Расписание звонков', async (ctx) => {
-    await ctx.replyWithHTML(await action( 'bells'));
+    await ctx.replyWithHTML(await bells.info());
 });
 
 bot.hears('Статус онлайн конференций', async (ctx) => {
-    await ctx.reply(await action( 'jh'));
+    await ctx.reply(userName + ', ' + await jitsi.health());
 });
 
 bot.command('open_m', async (ctx) => {
-    await ctx.reply(await action('open_m'));
+    await ctx.reply(await otkrivator.openMasterskie());
 });
 
+/*
+Когда то код был нужен для рефакторинга хранимых данных. Возможно, еще понадобиться
 bot.command('ref', async (ctx) => {
     await ctx.reply(await myself.refactor(cfg.VALID_USERS));
-});
+});*/
 
 bot.hears('Листы самооценки', async (ctx) => {
     // await ctx.reply(await action( 'myself'));
@@ -171,51 +164,60 @@ bot.hears('Листы самооценки', async (ctx) => {
 
 //если в сообщении будет подходящий шаблон, то выполняем соотвествующие действия
 bot.on('text', async (ctx) => {
-    if(userId in addCase) {     //Если бот предложил пользователю ввести дело, то в объекте будет свойство == id
-        delete addCase[userId];
-        await ctx.reply(await myself.new(userId, userName, ctx.message.text.trim()));
-    }
-    else{
-        if (ctx.message.text.startsWith('Д:')) {
-            await ctx.reply(await myself.new(userId, userName, ctx.message.text.slice(5).trim()));
+    try {
+        if (userId in addCase) {     //Если бот предложил пользователю ввести дело, то в объекте будет свойство == id
+            delete addCase[userId];
+            await ctx.reply(await myself.new(userId, userName, ctx.message.text.trim()));
         } else {
-            if (ctx.message.text === CONFIRM_DELETE) {
-                await ctx.reply(await action('myselfClear'));
+            if (ctx.message.text.startsWith('Д:')) {
+                await ctx.reply(await myself.new(userId, userName, ctx.message.text.slice(2).trim()));
             } else {
-                await hello(ctx);
+                if (ctx.message.text === CONFIRM_DELETE) {
+                    await ctx.reply(await myself.clear(userId));
+                } else {
+                    await hello(ctx);
+                }
             }
         }
+    }catch (err) {
+        await ctx.reply(err.message);
     }
 });
 
 //обработка команд с inline клавиатуры
 bot.on('callback_query', async (ctx) =>{
-    const callbackQuery =  ctx.callbackQuery.data;
-    switch (callbackQuery){
-        case 'myselfList':
-            await ctx.reply(await action('myselfList'));
-            break;
-        case 'myselfNew':
-            await ctx.reply(await action('myselfNew'));
-            break;
-        case 'myselfClear':
-            await ctx.reply(DELETE);
-            break;
-        case 'myselfFile':
-            const request = await action('myselfFile');
-            if(request.startsWith("Ошибка")){
-                await ctx.reply(request);
+        const callbackQuery = ctx.callbackQuery.data;
+        try {
+            switch (callbackQuery) {
+                case 'myselfList':
+                    await ctx.reply(await myself.list(userId, userName));
+                    break;
+                case 'myselfNew':
+                    addCase[userId] = false;
+                    await ctx.reply("Что ты сделал, дружочек?");
+                    break;
+                case 'myselfClear':
+                    await ctx.reply(DELETE);
+                    break;
+                case 'myselfFile':
+                    try {
+                        const myselfFile = await myself.file(userId);
+                        await ctx.replyWithDocument({source: myselfFile});
+                    } finally {                                //не зависимо от результата
+                        await myself.garbageCollector(userId); //сборка мусора
+                    }
+                    break;
             }
-            else {
-              await ctx.replyWithDocument({source: request}); //выплевывает файл в чат
-            }
-            await myself.garbageCollector(userId); //сборка мусора
-            break;
-    }
+        }catch (err) {
+            await ctx.reply(err.message);
+        }
 });
 bot.launch();
 
-
+process.on("uncaughtException",(err) => {
+    console.log("Все паламалась!!!");
+    console.log(err.message);
+});
 /*
 * Запаковать: zip file.odt -r *
   Распаковать в директорию: unzip template.odt -d e
