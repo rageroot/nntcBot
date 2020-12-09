@@ -4,7 +4,8 @@ const {Markup} = require('telegraf');
 
 //const HttpsProxyAgent = require('https-proxy-agent');
 
-const cfg = require('./helpers/config');
+const cfg = require('./resources/config');
+const strings = require('./resources/strings');
 const otkrivator = require('./helpers/otkrivator');
 const jitsi = require('./helpers/jitsi');
 const bells = require('./helpers/bells');
@@ -28,10 +29,6 @@ const addCase = {};
 * Защита от сучайного срабатывания
 * */
 
-const DELETE = "Воу, дружочек, у тебя серьезные намерения.\n Если хочешь забыть все, что было- напиши:\n " +
-    "Торжественно клянусь, что хочу стать бездельником и забыть все былые поступки! Раминь!";
-const CONFIRM_DELETE = "Торжественно клянусь, что хочу стать бездельником и забыть все былые поступки! Раминь!";
-
 let userId;
 let userName;
 
@@ -43,10 +40,10 @@ bot.use(async (ctx, next) => { //установка значений id и им�
 });
 
 bot.use(async (ctx, next) => {  //отсекаю невалидных пользователей
-    const ACCESS_DENIED_MESSAGE = userName + ', Вам доступ запрещён. Сообщите ваш ID для добавления полномочий: ' + userId;
+    strings.textConstants.ACCESS_DENIED_MESSAGE = userName + ', Вам доступ запрещён. Сообщите ваш ID для добавления полномочий: ' + userId;
 
     if (cfg.VALID_USERS.indexOf(userId) === -1) {
-        await ctx.reply(ACCESS_DENIED_MESSAGE);
+        await ctx.reply(strings.textConstants.ACCESS_DENIED_MESSAGE);
     }
     else {
         await next();
@@ -108,7 +105,7 @@ async function hello(ctx){
 
     await ctx.reply(WELCOME_MESSAGE, {
         "reply_markup": {
-            "keyboard": [["Расписание звонков", "Статус онлайн конференций"],   ["Открыть ВЦ", "Листы самооценки"]]
+            "keyboard": [[strings.keyboardConstants.BELLS, strings.keyboardConstants.JITSY],   [strings.keyboardConstants.VC, strings.keyboardConstants.MYSELF]]
         }
     });
 }
@@ -116,10 +113,10 @@ async function hello(ctx){
 async function mySelfMenu(ctx){
     await ctx.reply('Меню самооценки:',
          Markup.inlineKeyboard(
-             [[ Markup.callbackButton('Список выполненных дел', 'myselfList')],
-             [Markup.callbackButton('Добавить новое дело', 'myselfNew')],
-             [Markup.callbackButton('Очистить список дел', 'myselfClear')],
-             [Markup.callbackButton('Выгрузить файлом', 'myselfFile')],
+             [[ Markup.callbackButton(strings.keyboardConstants.MYSELF_LIST, strings.commands.MYSELF_LIST)],
+             [Markup.callbackButton(strings.keyboardConstants.MYSELF_NEW, strings.commands.MYSELF_NEW)],
+             [Markup.callbackButton(strings.keyboardConstants.MYSELF_CLEAR, strings.commands.MYSELF_CLEAR)],
+             [Markup.callbackButton(strings.keyboardConstants.MYSELF_GET_FILE, strings.commands.MYSELF_GET_FILE)],
              ]).extra());
 }
 
@@ -135,15 +132,15 @@ bot.help( async (ctx) => {
 //    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'voice'));
 //});
 
-bot.hears('Открыть ВЦ', async (ctx) => {
+bot.hears(strings.keyboardConstants.VC, async (ctx) => {
     await ctx.reply(await otkrivator.openItPark());
 });
 
-bot.hears('Расписание звонков', async (ctx) => {
+bot.hears(strings.keyboardConstants.BELLS, async (ctx) => {
     await ctx.replyWithHTML(await bells.info());
 });
 
-bot.hears('Статус онлайн конференций', async (ctx) => {
+bot.hears(strings.keyboardConstants.JITSY, async (ctx) => {
     await ctx.reply(userName + ', ' + await jitsi.health());
 });
 
@@ -157,8 +154,7 @@ bot.command('ref', async (ctx) => {
     await ctx.reply(await myself.refactor(cfg.VALID_USERS));
 });*/
 
-bot.hears('Листы самооценки', async (ctx) => {
-    // await ctx.reply(await action( 'myself'));
+bot.hears(strings.keyboardConstants.MYSELF, async (ctx) => {
     await mySelfMenu(ctx);
 });
 
@@ -169,10 +165,10 @@ bot.on('text', async (ctx) => {
             delete addCase[userId];
             await ctx.reply(await myself.new(userId, userName, ctx.message.text.trim()));
         } else {
-            if (ctx.message.text.startsWith('Д:')) {
+            if (ctx.message.text.startsWith(strings.commands.MYSELF_QUICK_NEW)) {
                 await ctx.reply(await myself.new(userId, userName, ctx.message.text.slice(2).trim()));
             } else {
-                if (ctx.message.text === CONFIRM_DELETE) {
+                if (ctx.message.text === strings.textConstants.CONFIRM_DELETE) {
                     await ctx.reply(await myself.clear(userId));
                 } else {
                     await hello(ctx);
@@ -185,33 +181,52 @@ bot.on('text', async (ctx) => {
 });
 
 //обработка команд с inline клавиатуры
+
 bot.on('callback_query', async (ctx) =>{
         const callbackQuery = ctx.callbackQuery.data;
         try {
             switch (callbackQuery) {
-                case 'myselfList':
+                case strings.commands.MYSELF_LIST:
                     await ctx.reply(await myself.list(userId, userName));
                     break;
-                case 'myselfNew':
+                case strings.commands.MYSELF_NEW:
                     addCase[userId] = false;
                     await ctx.reply("Что ты сделал, дружочек?");
                     break;
-                case 'myselfClear':
-                    await ctx.reply(DELETE);
+                case strings.commands.MYSELF_CLEAR:
+                    await ctx.reply(textConstants.DELETE);
                     break;
-                case 'myselfFile':
-                    try {
-                        const myselfFile = await myself.file(userId);
-                        await ctx.replyWithDocument({source: myselfFile});
-                    } finally {                                //не зависимо от результата
-                        await myself.garbageCollector(userId); //сборка мусора
-                    }
+                case strings.commands.MYSELF_GET_FILE:
+                        await replyMyselfFile(userId, ctx);
                     break;
             }
         }catch (err) {
             await ctx.reply(err.message);
         }
 });
+
+/**
+ * Отдает в чат лист самооценки и прибирает мусор за генератором файла
+ * @param userId
+ * @param ctx
+ * @returns {Promise<unknown>}
+ */
+async function replyMyselfFile(userId, ctx){
+    return new Promise(async (resolve, reject) => {
+        try {
+            const myselfFile = await myself.getMyselfFile(userId);
+            await ctx.replyWithDocument({source: myselfFile});
+            resolve();
+        }
+        catch (err) {
+            reject(new Error(err.message));
+        }
+        finally {
+            await myself.garbageCollector(userId); //сборка мусора
+        }
+    });
+}
+
 bot.launch();
 
 process.on("uncaughtException",(err) => {
