@@ -1,11 +1,11 @@
-export const textConstants = {
+module.exports.textConstants = {
     DELETE: "Воу, дружочек, у тебя серьезные намерения.\n Если хочешь забыть все, что было- напиши:\n " +
         "Торжественно клянусь, что хочу стать бездельником и забыть все былые поступки! Раминь!",
     CONFIRM_DELETE: "Торжественно клянусь, что хочу стать бездельником и забыть все былые поступки! Раминь!",
     ACCESS_DENIED_MESSAGE: "",
 };
 
-export const keyboardConstants = {
+module.exports.keyboardConstants = {
     BELLS: "Расписание звонков",
     JITSY: "Статус онлайн конференций",
     VC: "Открыть ВЦ",
@@ -17,7 +17,7 @@ export const keyboardConstants = {
 
 }
 
-export const commands = {
+module.exports.commands = {
     MYSELF_LIST: "myselfList",
     MYSELF_NEW: "myselfNew",
     MYSELF_CLEAR: "myselfClear",
