@@ -13,5 +13,6 @@ module.exports.VALID_USERS = [
   '1390904651', // emsh_g
   '1232001241', // dariy_segrey
     '145641664', //Satushev
-    '148057020', //Blynsky
+    '148057020', ////Blynsky
+    '407445282', //Dicovich
 ];

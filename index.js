@@ -238,3 +238,5 @@ process.on("uncaughtException",(err) => {
   Распаковать в директорию: unzip template.odt -d e
 *
 * */
+
+// Jest
