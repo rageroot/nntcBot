@@ -4,13 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "jest"
+  },
+  "jest": {
+    "collectCoverage": true
+
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "https-proxy-agent": "^5.0.0",
+    "jest": "^26.6.3",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
     "telegraf": "^3.38.0"
