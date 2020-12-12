@@ -60,7 +60,7 @@ module.exports.info = () => {
 		},
 	];
 
-	if((currentHours < 8) || (currentHours > 18)) {
+	if((currentHours < 8) || (currentHours > 18) && dateNow.getDay() != 0) {
 		if(currentHours < 8)
 			currentState = "Еще слишком рано";
 		else
@@ -79,7 +79,7 @@ module.exports.info = () => {
 					if(minutes - markupTime[i].stopMinuts < 0){
 						currentState = `Сейчас ${markupTime[i].description}, до конца ${markupTime[i].stopMinuts - minutes} минут`;
 						if(i % 2 == 0){
-							markup[i / 2] = ` ==> ${markup[i / 2]}`;
+							markup[i / 2] = `==> ${markup[i / 2]}`;
 						}
 						break;
 					}
