@@ -3,12 +3,9 @@ const bells = require("../helpers/bells");
 describe("Helper \"bells\"", () => {
     const fakeDate = new Date(Date.parse('2020-12-10T07:00:00'));
     const dateSpy = jest.spyOn(global, 'Date');
+    dateSpy.mockImplementation(() => fakeDate);
     let nextTime = 0;
-
-    beforeEach(() => {
-        dateSpy.mockImplementation(() => fakeDate);
-    });
-
+    
     afterEach(() => {
         fakeDate.setMinutes((fakeDate.getMinutes() + nextTime));
     });
@@ -60,7 +57,6 @@ describe("Helper \"bells\"", () => {
     });
 
     test("Sunday", async () => {
-        nextTime = 4300;
         const bellsRequest = await bells.info();
         expect(bellsRequest).toContain("Сегодня выходной");
         expect(bellsRequest).not.toContain("==>");

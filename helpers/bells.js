@@ -1,4 +1,8 @@
 'use strict'
+/**
+ * Выводит информацию о текущем занятии и время до конца
+ * @returns {Promise<unknown>}
+ */
 module.exports.info = () => {
 	const dateNow = new Date();
 	const currentHours = dateNow.getHours();

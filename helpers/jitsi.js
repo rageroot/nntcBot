@@ -1,11 +1,16 @@
 const rp = require('request-promise');
 const child_process = require('child_process');
 
+/**
+ * выводит список текущих конференций
+ * @returns {Promise<unknown>}
+ */
 module.exports.health = () => {
     return new Promise( resolve=>{
 	const cmd = '/usr/bin/ssh -i /home/ebot/.ssh/id_rsa administrator@192.168.10.187 -tt /srv/nntc/jitsi/jitsi-status.sh';
 	try {
 		const result = JSON.parse(child_process.execSync(cmd));
+		//console.log(result);
 		const baseDomain = 'https://online.nntc.nnov.ru';
 		const blackList = [
 			'org.jitsi.jicofo.health'
@@ -18,7 +23,7 @@ module.exports.health = () => {
 					//console.log('l2', l2);
 					if(l2.length){
 						l2.forEach(l3=>{
-
+							//console.log('l3', l3);
 							let writeEnable = true;
 							let roomName = l3.roomname;
 							blackList.forEach(blItem=>{
@@ -50,3 +55,22 @@ module.exports.health = () => {
 	}
     });
 };
+
+/*
+[
+	[
+		[
+			{
+				object
+			}
+		]
+	],
+	[
+		[
+			{
+				object
+			}
+		]
+	],
+]
+*/

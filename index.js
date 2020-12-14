@@ -194,7 +194,7 @@ bot.on('callback_query', async (ctx) =>{
                     await ctx.reply("Что ты сделал, дружочек?");
                     break;
                 case strings.commands.MYSELF_CLEAR:
-                    await ctx.reply(textConstants.DELETE);
+                    await ctx.reply(strings.textConstants.DELETE);
                     break;
                 case strings.commands.MYSELF_GET_FILE:
                         await replyMyselfFile(userId, ctx);
