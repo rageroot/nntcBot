@@ -16,11 +16,13 @@ module.exports.list = async (userId, userName) => {
             if(err){
                 reject(new Error("У вас нет самооценки"));
             }
-            toDoList = JSON.parse(file);
-            toDoList = botDecorator(toDoList);
+            else {
+                toDoList = JSON.parse(file);
+                toDoList = botDecorator(toDoList);
 
-            toDoList.unshift(userName + ", ты успел натворить:");
-            resolve(toDoList.join('\n'))
+                toDoList.unshift(userName + ", ты успел натворить:");
+                resolve(toDoList.join('\n'));
+            }
         });
     });
 };

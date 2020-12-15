@@ -12,6 +12,10 @@ child_process.execSync = jest.fn()
     .mockReturnValue(new Error("Jest test error"));
 
 describe("Helper \"jitsi\"", () => {
+    afterAll(() => {
+        child_process.execSync.mockReset();
+    });
+
     test("normal data", async () => {
         const testString = await jitsi.health();
         expect(testString).toContain("https://online.nntc.nnov.ru/test1");
