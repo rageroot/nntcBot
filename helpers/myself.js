@@ -47,8 +47,9 @@ module.exports.new = async (userId, userName, business) => {
             toDoList.push(business);
         }
 
-        await writeFile(myselfListFile, JSON.stringify(toDoList), "Не могу добавить новое дело");
-        resolve(userName + ", твое дело учтено!");
+        writeFile(myselfListFile, JSON.stringify(toDoList), "Не могу добавить новое дело")
+            .then(resolve(userName + ", твое дело учтено!"))
+            .catch(err => reject(err));
     });
 };
 
@@ -210,12 +211,14 @@ async function cpTemplate(pathToTemplate){
  */
 async function readFile(path, errMessage){
     return new Promise((resolve, reject) => {
-        fs.readFile(path, ((err, data) => {
+        fs.readFile(path, (err, data) => {
             if(err){
                  reject(new Error(errMessage));
             }
+            else {
                 resolve(data);
-        }));
+            }
+        });
     });
 }
 
