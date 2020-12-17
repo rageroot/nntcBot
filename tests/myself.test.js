@@ -6,6 +6,7 @@ let readFileCallback;
 
 const readFileSpy = jest.spyOn(fs, 'readFile');
 const writeFileSpy = jest.spyOn(fs, 'writeFile');
+const unlinkSpy = jest.spyOn(fs, 'unlink');
 const JSONparse = jest.spyOn(JSON, "parse");
 
 afterEach(() => {
@@ -85,6 +86,31 @@ describe("Helper \"myself\"", () => {
                 .catch((err) => {
                     expect(err.message).toBe("Не могу добавить новое дело");
                 });
+        });
+    });
+
+    describe("Function \"clear\"", () => {
+        unlinkSpy
+            .mockImplementationOnce((filename, cb) =>{
+                cb(null);
+            })
+            .mockImplementationOnce((filename, cb) =>{
+                cb(new Error("Jest test error"));
+            });
+
+        test("normal behavior", async () => {
+            const result = await myself.clear("12345");
+
+            expect(unlinkSpy.mock.calls[0][0]).toBe('./myself_lists/12345.txt');
+            expect(result).toBe("Нет у вас больше дел");
+        });
+
+        test("misbehavior", () => {
+            myself.clear("12345").catch((err) => {
+                expect(err.message).toBe("Не могу удалить файл");
+            });
+
+
         });
     });
 });
