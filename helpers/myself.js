@@ -126,7 +126,10 @@ module.exports.getMyselfFile = async (userId) => { //находимся в ко�
             reject(new Error(err.message));
         }
         child_process.exec(`cd ${templateDirectory}; zip -0 -r ../myself_${userId}.odt *`, (err) =>{ //упаковываю одт
-            resolve(`tmp/myself_${userId}.odt`);
+            if(err){
+                reject(new Error(err.message))
+            }
+                resolve(`tmp/myself_${userId}.odt`);
         });
     });
 }
