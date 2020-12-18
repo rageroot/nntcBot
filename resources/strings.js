@@ -3,6 +3,8 @@ module.exports.textConstants = {
         "Торжественно клянусь, что хочу стать бездельником и забыть все былые поступки! Раминь!",
     CONFIRM_DELETE: "Торжественно клянусь, что хочу стать бездельником и забыть все былые поступки! Раминь!",
     ACCESS_DENIED_MESSAGE: "",
+    REPORTS_GENERATE_MANUAL_FILE: "resources/manual.txt",
+    REPORTS_GENERATE_TEMPLATE_TXT: "odt_templates/reportsGenerator/reportTemplate.txt",
 };
 
 module.exports.keyboardConstants = {
@@ -14,7 +16,10 @@ module.exports.keyboardConstants = {
     MYSELF_NEW: "Добавить новое дело",
     MYSELF_CLEAR: "Очистить список дел",
     MYSELF_GET_FILE: "Выгрузить файлом",
-
+    REPORTS: "Генератор отчетов",
+    REPORTS_MAN: "Инструкция",
+    REPORTS_TEMPLATE: "Шаблон для заполнения",
+    REPORTS_GENERATE: "Сгенерировать отчет"
 }
 
 module.exports.commands = {
@@ -23,5 +28,7 @@ module.exports.commands = {
     MYSELF_CLEAR: "myselfClear",
     MYSELF_GET_FILE: "myselfFile",
     MYSELF_QUICK_NEW: "Д:",
-
+    REPORTS_MAN: "reportsMan",
+    REPORTS_TEMPLATE: "reportsTemplate",
+    REPORTS_GENERATE: "reportsGenerate"
 }

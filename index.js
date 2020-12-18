@@ -10,6 +10,7 @@ const otkrivator = require('./helpers/otkrivator');
 const jitsi = require('./helpers/jitsi');
 const bells = require('./helpers/bells');
 const myself = require('./helpers/myself');
+const report = require('./helpers/report-generator');
 const easterEggs = require('./helpers/easterEggs');
 const kursGen = require('./helpers/wizard-kurs-report-generator');
 
@@ -127,7 +128,17 @@ async function hello(ctx){
 
     await ctx.reply(WELCOME_MESSAGE, {
         "reply_markup": {
-            "keyboard": [[strings.keyboardConstants.BELLS, strings.keyboardConstants.JITSY],   [strings.keyboardConstants.VC, strings.keyboardConstants.MYSELF]]
+            "keyboard": [
+                            [
+                                strings.keyboardConstants.BELLS,
+                                strings.keyboardConstants.JITSY
+                            ],
+                            [
+                                strings.keyboardConstants.VC,
+                                strings.keyboardConstants.MYSELF,
+                                strings.keyboardConstants.REPORTS
+                            ]
+                        ]
         }
     });
 }
@@ -145,6 +156,20 @@ async function mySelfMenu(ctx){
              [Markup.callbackButton(strings.keyboardConstants.MYSELF_CLEAR, strings.commands.MYSELF_CLEAR)],
              [Markup.callbackButton(strings.keyboardConstants.MYSELF_GET_FILE, strings.commands.MYSELF_GET_FILE)],
              ]).extra());
+}
+
+/**
+ * Выводит меню генерации отчета по практикам
+ * @param ctx
+ * @returns {Promise<void>}
+ */
+async function reportMenu(ctx){
+    await ctx.reply('Меню генерации отчетов по практике:',
+        Markup.inlineKeyboard(
+            [[ Markup.callbackButton(strings.keyboardConstants.REPORTS_MAN, strings.commands.REPORTS_MAN)],
+                [Markup.callbackButton(strings.keyboardConstants.REPORTS_TEMPLATE, strings.commands.REPORTS_TEMPLATE)],
+                [Markup.callbackButton(strings.keyboardConstants.REPORTS_GENERATE, strings.commands.REPORTS_GENERATE)],
+            ]).extra());
 }
 
 bot.start(async (ctx) => {
@@ -201,6 +226,13 @@ bot.hears(strings.keyboardConstants.MYSELF, async (ctx) => {
 });
 
 /**
+ * Команда на вывод меню генерации отчетов
+ */
+bot.hears(strings.keyboardConstants.REPORTS, async (ctx) => {
+    await reportMenu(ctx);
+})
+
+/**
  * Выполняется если бот получил произвольный текст.
  * Проверка не было ли предложения ввести дело,
  * Проверка не было ли быстрой команды на ввод дела
@@ -230,30 +262,65 @@ bot.on('text', async (ctx) => {
 //обработка команд с inline клавиатуры
 
 /**
- * Реакция на нажатие кнопок меню самооценки
+ * Роутер нажатия кнопок inline клавиатуры
  */
 bot.on('callback_query', async (ctx) =>{
         const callbackQuery = ctx.callbackQuery.data;
-        try {
-            switch (callbackQuery) {
-                case strings.commands.MYSELF_LIST:
-                    await ctx.reply(await myself.list(userId, userName));
-                    break;
-                case strings.commands.MYSELF_NEW:
-                    addCase[userId] = false;
-                    await ctx.reply("Что ты сделал, дружочек?");
-                    break;
-                case strings.commands.MYSELF_CLEAR:
-                    await ctx.reply(strings.textConstants.DELETE);
-                    break;
-                case strings.commands.MYSELF_GET_FILE:
-                        await replyMyselfFile(userId, ctx);
-                    break;
-            }
-        }catch (err) {
-            await ctx.reply(err.message);
-        }
+        await mySelfMenuCallback(ctx, callbackQuery);
+        await reportMenuCallback(ctx, callbackQuery);
 });
+
+/**
+ * Реакция на нажатие кнопок меню генерации отчетов
+ * @param ctx
+ * @param callbackQuery
+ * @returns {Promise<void>}
+ */
+async function reportMenuCallback(ctx, callbackQuery){
+    try {
+        switch (callbackQuery) {
+            case strings.commands.REPORTS_MAN:
+                await ctx.replyWithDocument({source: report.manual()});
+                break;
+            case strings.commands.REPORTS_TEMPLATE:
+                await ctx.replyWithDocument({source: report.template()});
+                break;
+            case strings.commands.REPORTS_GENERATE:
+
+                break;
+        }
+    }catch (err) {
+        await ctx.reply(err.message);
+    }
+}
+
+/**
+ * Реакция на нажатие кнопок меню самооценки
+ * @param ctx
+ * @param callbackQuery
+ * @returns {Promise<void>}
+ */
+async function mySelfMenuCallback(ctx, callbackQuery){
+    try {
+        switch (callbackQuery) {
+            case strings.commands.MYSELF_LIST:
+                await ctx.reply(await myself.list(userId, userName));
+                break;
+            case strings.commands.MYSELF_NEW:
+                addCase[userId] = false;
+                await ctx.reply("Что ты сделал, дружочек?");
+                break;
+            case strings.commands.MYSELF_CLEAR:
+                await ctx.reply(strings.textConstants.DELETE);
+                break;
+            case strings.commands.MYSELF_GET_FILE:
+                await replyMyselfFile(userId, ctx);
+                break;
+        }
+    }catch (err) {
+        await ctx.reply(err.message);
+    }
+}
 
 /**
  * Отдает в чат лист самооценки и прибирает мусор за генератором файла
