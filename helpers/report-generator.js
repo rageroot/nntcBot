@@ -9,3 +9,6 @@ module.exports.template = function(){
     return strings.textConstants.REPORTS_GENERATE_TEMPLATE_TXT;
 }
 
+module.exports.generate = async function(){
+
+}

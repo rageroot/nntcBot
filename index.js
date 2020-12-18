@@ -23,15 +23,20 @@ const kursGen = require('./helpers/wizard-kurs-report-generator');
 
 const bot = new Telegraf(cfg.TG_TOKEN);
 /**
+ * intention- буфер намерений пользователя выполнить ввод данных следующим действием
+ * Защита от сучайного срабатывания
+ *
  * addCase - буфер, помогающий определить цель следующего сообщения- обработать как текст или записать в список дел
  * Считаем, что пользователь может передумать вводить новое дело и забьет другую команду, в таком случае
  * middlewares пометит свойство объекта == id пользователя на удаление и удалит при следующем вводе.
- * Защита от сучайного срабатывания
+ *
+ * addTemplateToGenerateReport - намерение загрузить заполненный шаблон для генерации отчетов по практике. Тот же принцип
  * @type {{}}
  */
-const addCase = {};
-
-
+const intention = {
+    addCase: {},
+    addTemplateToGenerateReport: {}
+};
 
 let userId;
 let userName;
@@ -71,18 +76,26 @@ bot.use(async (ctx, next) => {
 });
 
 /**
- * Защита от случайного срабатываия записи дел.
- * Если сразу после предложения ввести новое дело пользователь выбрал другое действие на клавиатуре
- * или команду- ввод дела отменяется. Реализовано при помощи добавления свойства в глобальный объект
+ * Защита от случайного срабатываия записи дел и генерации отчетов.
+ * Если сразу после предложения ввести новое дело или загрузить шаблон пользователь выбрал другое действие на клавиатуре
+ * или команду- ввод намерение отменяется. Реализовано при помощи добавления свойств в глобальный объект
  */
 bot.use(async (ctx, next) => {
     const userId = ctx.from.id.toString();
-    if(userId in addCase){
-        if(addCase[userId] === true){
-           delete addCase[userId];
+    if(userId in intention.addCase){
+        if(intention.addCase[userId] === true){
+           delete intention.addCase[userId];
         }
         else{
-            addCase[userId] = true;
+            intention.addCase[userId] = true;
+        }
+    }
+    if(userId in intention.addTemplateToGenerateReport){
+        if(intention.addTemplateToGenerateReport[userId] === true){
+            delete intention.addTemplateToGenerateReport[userId];
+        }
+        else{
+            intention.addTemplateToGenerateReport[userId] = true;
         }
     }
     await next();
@@ -232,6 +245,11 @@ bot.hears(strings.keyboardConstants.REPORTS, async (ctx) => {
     await reportMenu(ctx);
 })
 
+bot.on('document', async (ctx) => {
+    await ctx.reply(ctx.message.document.file_size);
+
+});
+
 /**
  * Выполняется если бот получил произвольный текст.
  * Проверка не было ли предложения ввести дело,
@@ -240,8 +258,8 @@ bot.hears(strings.keyboardConstants.REPORTS, async (ctx) => {
  */
 bot.on('text', async (ctx) => {
     try {
-        if (userId in addCase) {     //Если бот предложил пользователю ввести дело, то в объекте будет свойство == id
-            delete addCase[userId];
+        if (userId in intention.addCase) {     //Если бот предложил пользователю ввести дело, то в объекте будет свойство == id
+            delete intention.addCase[userId];
             await ctx.reply(await myself.new(userId, userName, ctx.message.text.trim()));
         } else {
             if (ctx.message.text.startsWith(strings.commands.MYSELF_QUICK_NEW)) {
@@ -286,7 +304,8 @@ async function reportMenuCallback(ctx, callbackQuery){
                 await ctx.replyWithDocument({source: report.template()});
                 break;
             case strings.commands.REPORTS_GENERATE:
-
+                intention.addTemplateToGenerateReport[userId] = false;
+                await ctx.reply("Дай мне заполненный шаблон, дружочек");
                 break;
         }
     }catch (err) {
@@ -307,7 +326,7 @@ async function mySelfMenuCallback(ctx, callbackQuery){
                 await ctx.reply(await myself.list(userId, userName));
                 break;
             case strings.commands.MYSELF_NEW:
-                addCase[userId] = false;
+                intention.addCase[userId] = false;
                 await ctx.reply("Что ты сделал, дружочек?");
                 break;
             case strings.commands.MYSELF_CLEAR:
