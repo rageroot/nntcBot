@@ -245,9 +245,24 @@ bot.hears(strings.keyboardConstants.REPORTS, async (ctx) => {
     await reportMenu(ctx);
 })
 
+/**
+ * Если пользователь загрузил файл- проверяю намерение сгенерировать отчет
+ */
 bot.on('document', async (ctx) => {
-    await ctx.reply(ctx.message.document.file_size);
-
+    // await ctx.reply(ctx.message.document.file_id);
+    try {
+        // if (userId in intention.addTemplateToGenerateReport) {
+        //     delete intention.addTemplateToGenerateReport[userId];
+            const fileId = ctx.message.document.file_id;
+            //не хотел подключать API телеграмма к хэлперам, по этому подготавливаю
+            //файл к загрузке в роутере
+            const telegramFileResponse = await ctx.telegram.getFile(fileId);
+            const pathToArchiveWithReports = await report.generate(userId, telegramFileResponse);
+            await ctx.reply(pathToArchiveWithReports);
+        // }
+    }catch (err) {
+        await ctx.reply(err.message);
+    }
 });
 
 /**
