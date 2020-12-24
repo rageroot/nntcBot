@@ -251,17 +251,19 @@ bot.hears(strings.keyboardConstants.REPORTS, async (ctx) => {
 bot.on('document', async (ctx) => {
     // await ctx.reply(ctx.message.document.file_id);
     try {
-        // if (userId in intention.addTemplateToGenerateReport) {
-        //     delete intention.addTemplateToGenerateReport[userId];
+         if (userId in intention.addTemplateToGenerateReport) {
+            delete intention.addTemplateToGenerateReport[userId];
             const fileId = ctx.message.document.file_id;
             //не хотел подключать API телеграмма к хэлперам, по этому подготавливаю
             //файл к загрузке в роутере
             const telegramFileResponse = await ctx.telegram.getFile(fileId);
             const pathToArchiveWithReports = await report.generate(userId, telegramFileResponse);
-            await ctx.reply(pathToArchiveWithReports);
-        // }
+            await ctx.replyWithDocument({source: pathToArchiveWithReports});
+         }
     }catch (err) {
         await ctx.reply(err.message);
+    }finally {
+        await report.garbageCollector(userId);
     }
 });
 

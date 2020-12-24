@@ -58,6 +58,20 @@ module.exports.generate = function(userId, tfr){
 }
 
 /**
+ * Сборщик мусора
+ * @param userId
+ * @returns {Promise<void>}
+ */
+module.exports.garbageCollector = async function (userId){
+    const tmpPath = `tmp/${userId}_reports`;
+    child_process.exec(`rm -rf ${tmpPath}`,(err) => {
+        if(err){
+            throw new Error("не могу собрать мусор");
+        }
+    });
+}
+
+/**
  * Загрузка подготовленного файла
  * @param filePathOnTelegramServer
  * @param folderOnLocal
@@ -363,7 +377,7 @@ function fillingTeacherReportWithRealData(template, info){
             .replace(/\$codeSpec\$/g, info.codeSpec)
             .replace(/\$specGroup\$/g, info.spec)
             .replace(/\$pModule\$/g, info.pm)
-            .replace(/\$cource\$/g, info.cource)
+            .replace(/\$course\$/g, info.cource)
             .replace(/\$startDate\$/g, info.begin)
             .replace(/\$endDate\$/g, info.end)
             .replace(/\$leader\$/g, info.leader)
