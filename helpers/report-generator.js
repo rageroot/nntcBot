@@ -47,7 +47,7 @@ module.exports.generate = function(userId, tfr){
             await createCharacteristics(parseText, paths);
             await createTeachersReport(parseText, paths);
 
-            await packer(paths.outcomeDir, `\'${parseText.group}.zip\'`)
+            await packerWith7z(paths.outcomeDir, `\'${parseText.group}.zip\'`)
 
             resolve(`${paths.tmpFolderPath}/${parseText.group}.zip`);
         }catch (err) {
@@ -306,6 +306,25 @@ function packer(input, output){
         child_process.exec(command, err => {
             if(err){
                 reject(new Error("Не могу запаковать в odt"))
+            }
+            resolve();
+        });
+    }));
+}
+
+/**
+ * Из за кривой работы русского языка на ubuntu-server нужен архиватор 7z, который не ломает кодировку файлов
+ * в остальном делает то же самое, что packer
+ * Должны быть установлены p7zip-full
+ * @param input
+ * @param output
+ */
+function packerWith7z(input, output){
+    return new Promise(((resolve, reject) => {
+        const command = `cd ${input}; 7z a -tzip ../${output}`;
+        child_process.exec(command, err => {
+            if(err){
+                reject(new Error("Не могу запаковать zip архив"))
             }
             resolve();
         });
