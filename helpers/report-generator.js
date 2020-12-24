@@ -32,7 +32,8 @@ module.exports.generate = function(userId, tfr){
         const paths = {
             tmpFolderPath: `tmp/${userId}_reports`,
             outcomeDir: `tmp/${userId}_reports/outcome`,
-            reportsCharacteristicTemplate: 'odt_templates/reportsGenerator/odtHarTemplate'
+            reportsCharacteristicTemplate: 'odt_templates/reportsGenerator/odtHarTemplate',
+            reportsTeacherTemplate: 'odt_templates/reportsGenerator/odtOtchRukTemplate'
         }
 
         try{
@@ -44,9 +45,11 @@ module.exports.generate = function(userId, tfr){
             const parseText = await inputParser(inputFileText);
 
             await createCharacteristics(parseText, paths);
+            await createTeachersReport(parseText, paths);
 
-            console.log(await inputParser(inputFileText));
-            resolve(inputFileText.toString());
+            await packer(paths.outcomeDir, `\'${parseText.group}.zip\'`)
+
+            resolve(`${paths.tmpFolderPath}/${parseText.group}.zip`);
         }catch (err) {
             reject(err);
         }
@@ -195,7 +198,7 @@ function createCharacteristics(info, paths){
             try {
                 await cpTemplate(paths.reportsCharacteristicTemplate, `${paths.tmpFolderPath}/${index}`);
                 const contentFile = await fsPromises.readFile(`${paths.tmpFolderPath}/${index}/content.xml`);
-                const totals = await fillingWithRealData(contentFile.toString(), index, info);
+                const totals = await fillingCharacteristicsWithRealData(contentFile.toString(), index, info);
                 await fsPromises.writeFile(`${paths.tmpFolderPath}/${index}/content.xml`, totals)
                 await packer(`${paths.tmpFolderPath}/${index}`, `\'outcome/${info.students[index]}.odt\'`);
                 index++;
@@ -214,7 +217,7 @@ function createCharacteristics(info, paths){
  * @param info объект реальных данных
  * @returns {Promise<unknown>} заполненный шаблон
  */
-function fillingWithRealData(template, index, info){
+function fillingCharacteristicsWithRealData(template, index, info){
    return new Promise(resolve => {
        //подчеркивание нужной оценки в таблицах
        const beforeGrade = "<text:span text:style-name=\"T25\">";
@@ -277,7 +280,8 @@ function fillingWithRealData(template, index, info){
 }
 
 /**
- * Запаковывает файли из input в output
+ * Запаковывает файли из input в output.
+ * ВАЖНО- из input делает шаг назад, далее корнем считается каталог перед input
  * @param input
  * @param output
  * @returns {Promise<unknown>}
@@ -285,7 +289,6 @@ function fillingWithRealData(template, index, info){
 function packer(input, output){
     return new Promise(((resolve, reject) => {
         const command = `cd ${input}; zip -0 -r ../${output} *`;
-        console.log(command);
         child_process.exec(command, err => {
             if(err){
                 reject(new Error("Не могу запаковать в odt"))
@@ -293,4 +296,86 @@ function packer(input, output){
             resolve();
         });
     }));
+}
+
+/**
+ * Создает отчет руководителя
+ * @param info ссылка на объект с входными данными, взятыми из присланного пользователем файла
+ * @param paths ссылка на объект путей к рабочим директориям
+ * @returns {Promise<unknown>}
+ */
+function createTeachersReport(info, paths){
+    return new Promise(async (resolve, reject) => {
+        try {
+            await cpTemplate(paths.reportsTeacherTemplate, `${paths.tmpFolderPath}/teacherReport`);
+            const contentFile = await fsPromises.readFile(`${paths.tmpFolderPath}/teacherReport/content.xml`);
+            const totals = await fillingTeacherReportWithRealData(contentFile.toString(), info);
+            await fsPromises.writeFile(`${paths.tmpFolderPath}/teacherReport/content.xml`, totals)
+            await packer(`${paths.tmpFolderPath}/teacherReport`, `\'outcome/teacherReport.odt\'`);
+
+        } catch (err) {
+            reject(new Error("Возникли проблемы с генерацией отчетов"));
+        }
+    resolve();
+    });
+}
+
+/**
+ *
+ * Возвращает заполненные реальными данными шаблон
+ * @param template верстка с шаблоном
+ * @param info объект реальных данных
+ * @returns {Promise<unknown>} заполненный шаблон
+ */
+function fillingTeacherReportWithRealData(template, info){
+    return new Promise((resolve) => {
+        const gradeCount = {
+            five: 0,
+            four: 0,
+            three: 0,
+            two: 0
+        };
+
+        info.grades.forEach(grade => {
+            switch (grade) {
+                case '5':
+                    gradeCount.five++;
+                    break;
+                case '4':
+                    gradeCount.four++;
+                    break;
+                case '3':
+                    gradeCount.three++;
+                    break;
+                case '2':
+                    gradeCount.two++;
+                    break;
+            }
+        });
+
+        const studentsCount = +info.students.length;
+
+        const procUsp = Math.round((100 / studentsCount) * (studentsCount - gradeCount.two));
+        const procKach = Math.round((100 / studentsCount) * (studentsCount - gradeCount.two - gradeCount.three));
+
+        const result = template
+            .replace(/\$group\$/g, info.group)
+            .replace(/\$codeSpec\$/g, info.codeSpec)
+            .replace(/\$specGroup\$/g, info.spec)
+            .replace(/\$pModule\$/g, info.pm)
+            .replace(/\$cource\$/g, info.cource)
+            .replace(/\$startDate\$/g, info.begin)
+            .replace(/\$endDate\$/g, info.end)
+            .replace(/\$leader\$/g, info.leader)
+            .replace(/\$hours\$/g, info.hours)
+            .replace(/\$studentsCount\$/g, studentsCount)
+            .replace(/\$five\$/g, gradeCount.five)
+            .replace(/\$four\$/g, gradeCount.four)
+            .replace(/\$three\$/g, gradeCount.three)
+            .replace(/\$two\$/g, gradeCount.two)
+            .replace(/\$procUsp\$/g, procUsp)
+            .replace(/\$procKach\$/g, procKach)
+
+        resolve(result);
+    });
 }
