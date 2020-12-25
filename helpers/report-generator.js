@@ -37,12 +37,16 @@ module.exports.generate = function(userId, tfr){
         }
 
         try{
+            if(!tfr.file_path.endsWith('.txt')){
+                reject(new Error('Файл не правильного формата'));
+            }
             await fsPromises.mkdir(paths.tmpFolderPath);
             await fsPromises.mkdir(paths.outcomeDir);
             const inputDataFile = await downloadFile(tfr.file_path, paths.tmpFolderPath);
             let inputFileText = await fsPromises.readFile(inputDataFile);
             inputFileText = inputFileText.toString().replace(/\n/g, '').split(';');
             const parseText = await inputParser(inputFileText);
+            await validator(parseText);
 
             await createCharacteristics(parseText, paths);
             await createTeachersReport(parseText, paths);
@@ -201,51 +205,84 @@ function cpTemplate(from, to){
 
 /**
  * Создает характеристики на каждого студента
+ * 1- копиует шаблон, заполняет общими для всех данными, и выносит файл шаблона за папку
+ * 2- копирует вынесенный файл в папку, вносит уникальный для каждого студента данные
+ * 3- собирает всю папку шаблона в odt
  * @param info ссылка на объект с входными данными, взятыми из присланного пользователем файла
  * @param paths ссылка на объект путей к рабочим директориям
  * @returns {Promise<unknown>}
  */
 function createCharacteristics(info, paths){
     return new Promise(async (resolve, reject) => {
-        let index = 0;
-        for(const student of info.students) {
-            try {
-                await cpTemplate(paths.reportsCharacteristicTemplate, `${paths.tmpFolderPath}/${index}`);
-                const contentFile = await fsPromises.readFile(`${paths.tmpFolderPath}/${index}/content.xml`);
-                const totals = await fillingCharacteristicsWithRealData(contentFile.toString(), index, info);
-                await fsPromises.writeFile(`${paths.tmpFolderPath}/${index}/content.xml`, totals)
-                await packer(`${paths.tmpFolderPath}/${index}`, `\'outcome/${info.students[index]}.odt\'`);
+        const contentXmlPath = `${paths.tmpFolderPath}/templateWithGeneralData/content.xml`;
+        try {
+            await cpTemplate(paths.reportsCharacteristicTemplate, `${paths.tmpFolderPath}/templateWithGeneralData`);
+            const contentGeneralFile = await fsPromises.readFile(contentXmlPath);
+            const totalsGeneral = await fillingCharacteristicsWithGeneralData(contentGeneralFile.toString(), info);
+            await fsPromises.writeFile(contentXmlPath, totalsGeneral)
+
+            await cpTemplate(contentXmlPath, `${paths.tmpFolderPath}/content.xml`);
+
+            let index = 0;
+            for(const student of info.students) {
+                await cpTemplate(`${paths.tmpFolderPath}/content.xml`, contentXmlPath);
+                const contentFile = await fsPromises.readFile(contentXmlPath);
+                const totals = await fillingCharacteristicsWithUnicalsData(contentFile.toString(), index, info);
+                await fsPromises.writeFile(contentXmlPath, totals)
+                await packer(`${paths.tmpFolderPath}/templateWithGeneralData`, `\'outcome/${info.students[index]}.odt\'`);
                 index++;
-            } catch (err) {
-                reject(new Error("Возникли проблемы с генерацией отчетов"));
             }
+        } catch (err) {
+            reject(new Error("Возникли проблемы с генерацией отчетов " + err.message));
         }
         resolve();
     });
 }
 
 /**
- * Возвращает заполненные реальными данными шаблон
+ * Заполняет шаблон одинаковыми для всех данными, чтобы не повторять одну работу много раз.
+ * @param template
+ * @param info
+ * @returns {Promise<unknown>}
+ */
+function fillingCharacteristicsWithGeneralData(template, info){
+    return new Promise((resolve, reject) => {
+        //создание верстки для таблицы с неизвестным заранее количестве ПК
+        const beforePk = "<table:table-row table:style-name=\"Таблица4.2\"><table:table-cell table:style-name=\"Таблица4.A2\" office:value-type=\"string\"><text:p text:style-name=\"P19\">";
+        const afterPk =  "</text:p></table:table-cell><table:table-cell table:style-name=\"Таблица4.A2\" office:value-type=\"string\"><text:p text:style-name=\"P30\">scale</text:p></table:table-cell><table:table-cell table:style-name=\"Таблица4.C2\" office:value-type=\"string\"><text:p text:style-name=\"P27\"/></table:table-cell></table:table-row>";
+        const pk = [];
+        for(const competence of info.pk){
+            pk.push(beforePk + competence + afterPk);
+        }
+
+        const result = template
+            .replace(/\$group\$/g, info.group)
+            .replace(/\$codeSpec\$/g, info.codeSpec)
+            .replace(/\$specGroup\$/g, info.spec)
+            .replace(/\$pModule\$/g, info.pm)
+            .replace(/\$startDate\$/g, info.begin)
+            .replace(/\$endDate\$/g, info.end)
+            .replace(/\$leader\$/g, info.leader)
+            .replace(/\$leadPosition\$/g, info.leadPosition)
+            .replace(/\$row\$/g, pk.join(""))
+        resolve(result);
+    });
+}
+
+/**
+ * Возвращает заполненные уникальными для каждого студента данными
  * @param template верстка с шаблоном
  * @param index номер текущей итерации
  * @param info объект реальных данных
  * @returns {Promise<unknown>} заполненный шаблон
  */
-function fillingCharacteristicsWithRealData(template, index, info){
+function fillingCharacteristicsWithUnicalsData(template, index, info){
    return new Promise(resolve => {
        //подчеркивание нужной оценки в таблицах
        const beforeGrade = "<text:span text:style-name=\"T25\">";
        const afterGrade = "</text:span>";
        const grades = [0, 1, 2, 3, 4, 5];
        grades[+info.grades[index]] = beforeGrade + grades[+info.grades[index]] + afterGrade;
-
-       //создание верстки для таблицы с неизвестным заранее количестве ПК
-       const beforePk = "<table:table-row table:style-name=\"Таблица4.2\"><table:table-cell table:style-name=\"Таблица4.A2\" office:value-type=\"string\"><text:p text:style-name=\"P19\">";
-       const afterPk =  "</text:p></table:table-cell><table:table-cell table:style-name=\"Таблица4.A2\" office:value-type=\"string\"><text:p text:style-name=\"P30\">scale</text:p></table:table-cell><table:table-cell table:style-name=\"Таблица4.C2\" office:value-type=\"string\"><text:p text:style-name=\"P27\"/></table:table-cell></table:table-row>";
-       const pk = [];
-       for(const competence of info.pk){
-           pk.push(beforePk + competence + afterPk);
-       }
 
        //установка маркера в нужной позиции соответсвующих таблиц
        const gradeMarker = {
@@ -272,14 +309,6 @@ function fillingCharacteristicsWithRealData(template, index, info){
 
        const result = template
            .replace(/\$studentName\$/g, info.students[index])
-           .replace(/\$group\$/g, info.group)
-           .replace(/\$codeSpec\$/g, info.codeSpec)
-           .replace(/\$specGroup\$/g, info.spec)
-           .replace(/\$pModule\$/g, info.pm)
-           .replace(/\$startDate\$/g, info.begin)
-           .replace(/\$endDate\$/g, info.end)
-           .replace(/\$leader\$/g, info.leader)
-           .replace(/\$leadPosition\$/g, info.leadPosition)
            .replace(/\$f\$/g, gradeMarker.five)
            .replace(/\$nf\$/g, gradeMarker.four + gradeMarker.three)
            .replace(/\$no\$/g, gradeMarker.two)
@@ -287,7 +316,6 @@ function fillingCharacteristicsWithRealData(template, index, info){
            .replace(/\$fou\$/g, gradeMarker.four)
            .replace(/\$thr\$/g, gradeMarker.three)
            .replace(/\$tw\$/g, gradeMarker.two)
-           .replace(/\$row\$/g, pk.join(""))
            .replace(/scale/g, grades.join(" "));
        resolve(result);
    });
@@ -402,4 +430,26 @@ function fillingTeacherReportWithRealData(template, info){
         resolve(result);
     });
 }
-//нужен валидатор и оптимизация изменения шаблона
+
+/**
+ * Проверяет наличие всех необходимых полей в объекте после парсера
+ * @param inputValues
+ * @returns {Promise<unknown>}
+ */
+function validator(inputValues){
+    return new Promise((resolve, reject) => {
+        const property = ['group', 'codeSpec', 'spec', 'cource',
+            'hours', 'pm', 'begin', 'end', 'leader', 'leadPosition'];
+
+        if(!inputValues.pk.length || !inputValues.students.length || !inputValues.grades.length) {
+            reject(new Error('Не корректно заполнен шаблон'));
+        }
+
+        for(const prop of property){
+            if(!(prop in inputValues)){
+                reject(new Error('Не корректно заполнен шаблон'));
+            }
+        }
+        resolve();
+    });
+}
