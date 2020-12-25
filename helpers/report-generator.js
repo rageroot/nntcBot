@@ -47,7 +47,7 @@ module.exports.generate = function(userId, tfr){
             await createCharacteristics(parseText, paths);
             await createTeachersReport(parseText, paths);
 
-            await packerWith7z(paths.outcomeDir, `\'${parseText.group}.zip\'`)
+            await packer(paths.outcomeDir, `\'${parseText.group}.zip\'`, '7zip')
 
             resolve(`${paths.tmpFolderPath}/${parseText.group}.zip`);
         }catch (err) {
@@ -298,33 +298,23 @@ function fillingCharacteristicsWithRealData(template, index, info){
  * ВАЖНО- из input делает шаг назад, далее корнем считается каталог перед input
  * @param input
  * @param output
+ * @param compressor выбор архиватора. По умолчанию zip. Для верной кодировки русских символов в архиве требуется выбирать
+ * 7zip.
  * @returns {Promise<unknown>}
  */
-function packer(input, output){
+function packer(input, output, compressor){
+    compressor = compressor || 'zip';
     return new Promise(((resolve, reject) => {
-        const command = `cd ${input}; zip -0 -r ../${output} *`;
+        let command = `cd ${input};`;
+        if(compressor === '7zip'){
+            command += `7z a -tzip ../${output}`;
+        }
+        else {
+            command += `zip -0 -r ../${output} *`;
+        }
         child_process.exec(command, err => {
             if(err){
                 reject(new Error("Не могу запаковать в odt"))
-            }
-            resolve();
-        });
-    }));
-}
-
-/**
- * Из за кривой работы русского языка на ubuntu-server нужен архиватор 7z, который не ломает кодировку файлов
- * в остальном делает то же самое, что packer
- * Должны быть установлены p7zip-full
- * @param input
- * @param output
- */
-function packerWith7z(input, output){
-    return new Promise(((resolve, reject) => {
-        const command = `cd ${input}; 7z a -tzip ../${output}`;
-        child_process.exec(command, err => {
-            if(err){
-                reject(new Error("Не могу запаковать zip архив"))
             }
             resolve();
         });
@@ -412,3 +402,4 @@ function fillingTeacherReportWithRealData(template, info){
         resolve(result);
     });
 }
+//нужен валидатор и оптимизация изменения шаблона
