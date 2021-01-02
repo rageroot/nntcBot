@@ -5,7 +5,7 @@ const mySelfSchema = mongoose.Schema({
     affairs: {type: Array}
 }, {collection: 'mySelf'});
 
-const Affair = mongoose.Model('mySelf', mySelfSchema);
+const Affair = mongoose.model('mySelf', mySelfSchema);
 
 /**
  * Создает новый документ в коллекции или редактирует существующий
@@ -14,10 +14,12 @@ const Affair = mongoose.Model('mySelf', mySelfSchema);
  * @returns {Promise<void>}
  */
 module.exports.addAffair = async (userId, data) => {
-    let userAffairs = Affair.findOne({userId: userId});
+    let userAffairs = await Affair.findOne({userId: userId}).exec();
     if(!userAffairs){
         userAffairs = new Affair(
-            {userId: userId}
+            {
+                userId: userId,
+            }
         );
     }
     userAffairs.affairs.push({
@@ -31,3 +33,39 @@ module.exports.addAffair = async (userId, data) => {
     }
 }
 
+/**
+ * Очищает список дел в базе
+ * @param userId
+ * @returns {Promise<void>}
+ */
+module.exports.clearAffair = async (userId) => {
+    const userAffairs = await Affair.findOne({userId: userId}).exec();
+    if(!userAffairs){
+        throw new Error('Не могу найти записи в базе данных');
+    }
+    userAffairs.affairs.length = 0;
+    try {
+        await userAffairs.save();
+    } catch (err) {
+        throw new Error('Ошибка при сохранении в базу данных');
+    }
+}
+
+module.exports.get = async (userId) => {
+    return await Affair.findOne({userId: userId}).exec();
+}
+
+module.exports.refactor = async (userId, data) => {
+    const userAffairs = new Affair(
+        {
+            userId: userId,
+            affairs: data,
+        }
+    );
+
+    try {
+        await userAffairs.save();
+    } catch (err) {
+        throw new Error('Ошибка при сохранении в базу данных');
+    }
+}

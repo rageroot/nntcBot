@@ -1,5 +1,6 @@
 const fs = require('fs');
 const child_process = require('child_process');
+const modelBd = require('../models/mySelf');
 
 /**
  * Выводит список выполненных дел
@@ -73,27 +74,34 @@ module.exports.clear =  async (userId) => { //просто удаляет фай
 //Требовался только один раз, по этому заглушка
 //потребовался второй раз, но все равно заглушка
 module.exports.refactor = async (users) => {
-    /*const message = [];
-    users.forEach(user => {
+    const message = [];
+    users.forEach((user) => {
         const filename = './myself_lists/' + user + '.txt';
 
         try {
             const file =  fs.readFileSync(filename);
             let toDoList = JSON.parse(file);
-            toDoList = toDoList.map(unit => {
-                return unit.substring(unit.indexOf(' ', 0)).trim();
+            toDoList = toDoList.map((unit) => {
+                return {
+                    affair: unit,
+                    date: Date.now()
+                }
             });
-            fs.writeFileSync(filename, JSON.stringify(toDoList), 'utf8');
+            // fs.writeFileSync(filename, JSON.stringify(toDoList), 'utf8');
+           console.log(toDoList);
+            modelBd.refactor(user, toDoList);
             message.push(`${user} ИЗМЕНЕН`);
+
         }
         catch (err){
             message.push(`${user} не имеет файла`);
         }
 
     });
+    console.log(await modelBd.get(158048277));
     return new Promise( resolve=>{
-        resolve(message.join('\n'))});*/
-    return "Заглушка";
+        resolve(message.join('\n'))});
+    //return "Заглушка";
 
 }
 
