@@ -11,8 +11,9 @@ const jitsi = require('./helpers/jitsi');
 const bells = require('./helpers/bells');
 const myself = require('./helpers/myself');
 const report = require('./helpers/report-generator');
-const easterEggs = require('./helpers/easterEggs');
-const kursGen = require('./helpers/wizard-kurs-report-generator');
+const bd = require('./models/botBd');
+// const easterEggs = require('./helpers/easterEggs');
+// const kursGen = require('./helpers/wizard-kurs-report-generator');
 
 
 /*const bot = new Telegraf(cfg.TG_TOKEN, {
@@ -22,6 +23,7 @@ const kursGen = require('./helpers/wizard-kurs-report-generator');
 });*/
 
 const bot = new Telegraf(cfg.TG_TOKEN);
+bd.connect();
 /**
  * intention- буфер намерений пользователя выполнить ввод данных следующим действием
  * Защита от сучайного срабатывания
