@@ -12,6 +12,7 @@ const bells = require('./helpers/bells');
 const myself = require('./helpers/myself');
 const report = require('./helpers/report-generator');
 const bd = require('./models/botBd');
+const userModel = require('./models/users');
 // const easterEggs = require('./helpers/easterEggs');
 // const kursGen = require('./helpers/wizard-kurs-report-generator');
 
@@ -138,6 +139,7 @@ async function hello(ctx){
         'Добро пожаловать, ' + userName,
         'Чтобы быстро добавить дело введи:',
         'Д: %whatYourDo%',
+        'Чтобы включить или выключить отображение дат в листе самооценки: /showDate',
         'Или выбери действие:',
     ].join('\n');
 
@@ -230,6 +232,23 @@ bot.command('open_m', async (ctx) => {
 //Когда то код был нужен для рефакторинга хранимых данных. Возможно, еще понадобиться
 bot.command('ref', async (ctx) => {
     await ctx.reply(await myself.refactor(cfg.VALID_USERS));
+});
+
+/**
+ * Включает и выключает режим вывода дат в листах самооценки
+ */
+bot.command('showDate', async (ctx) => {
+    try {
+        const show = await userModel.get(userId);
+        const queryRes = await userModel.dateDisplay(userId, !show.showDate);
+        if(queryRes) {
+            await ctx.reply(`Вывод дат в листах самооценки ${(!show.showDate) ? 'включен' : 'выключен'}`);
+        }else{
+            await ctx.reply("Твоих данных нет в базе, дружочек");
+        }
+    } catch (err) {
+        await ctx.reply(err.message);
+    }
 });
 
 /**

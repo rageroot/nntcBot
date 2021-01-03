@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const modelUser = require('../models/users');
 
 const mySelfSchema = mongoose.Schema({
     userId: {type: Number, min: 1},
@@ -51,10 +52,25 @@ module.exports.clearAffair = async (userId) => {
     }
 }
 
-module.exports.get = async (userId) => {
-    return await Affair.findOne({userId: userId}).exec();
+/**
+ * Получает данные из базы
+ * @param userId
+ * @returns {Promise<unknown>}
+ */
+module.exports.get = (userId) => {
+    return new Promise(resolve => {
+       Affair.findOne({userId: userId}, (err, data) => {
+           resolve(data);
+       });
+    });
 }
 
+/**
+ * Требуется чтобы один раз заполнить базу данными из файлов
+ * @param userId
+ * @param data
+ * @returns {Promise<void>}
+ */
 module.exports.refactor = async (userId, data) => {
     const userAffairs = new Affair(
         {
@@ -64,6 +80,7 @@ module.exports.refactor = async (userId, data) => {
     );
 
     try {
+        await modelUser.refactor(userId);
         await userAffairs.save();
     } catch (err) {
         throw new Error('Ошибка при сохранении в базу данных');

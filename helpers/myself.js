@@ -87,8 +87,6 @@ module.exports.refactor = async (users) => {
                     date: Date.now()
                 }
             });
-            // fs.writeFileSync(filename, JSON.stringify(toDoList), 'utf8');
-           console.log(toDoList);
             modelBd.refactor(user, toDoList);
             message.push(`${user} ИЗМЕНЕН`);
 
@@ -98,7 +96,6 @@ module.exports.refactor = async (users) => {
         }
 
     });
-    console.log(await modelBd.get(158048277));
     return new Promise( resolve=>{
         resolve(message.join('\n'))});
     //return "Заглушка";
