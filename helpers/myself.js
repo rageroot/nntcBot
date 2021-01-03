@@ -1,30 +1,25 @@
 const fs = require('fs');
 const child_process = require('child_process');
-const modelBd = require('../models/mySelf');
+const modelMyself = require('../models/mySelf');
+const modelUser = require('../models/users');
 
 /**
  * Выводит список выполненных дел
  * @param userId
  * @param userName
- * @returns {Promise<unknown>}
+ * @returns {Promise<Array>}
  */
 module.exports.list = async (userId, userName) => {
-    return new Promise( (resolve, reject)=>{
-        const filename = './myself_lists/' + userId + '.txt';
+    return new Promise( async (resolve, reject)=>{
         let toDoList = [];
-
-        fs.readFile(filename, (err, file) =>{
-            if(err){
-                reject(new Error("У вас нет самооценки"));
-            }
-            else {
-                toDoList = JSON.parse(file);
-                toDoList = botDecorator(toDoList);
-
-                toDoList.unshift(userName + ", ты успел натворить:");
-                resolve(toDoList.join('\n'));
-            }
-        });
+        try {
+            const queryMyself = await modelMyself.get(userId);
+            toDoList = await botDecorator(userId, queryMyself.affairs);
+            toDoList.unshift(userName + ", ты успел натворить:");
+            resolve(toDoList.join('\n'));
+        }catch (err) {
+            reject(err.message);
+        }
     });
 };
 
@@ -84,10 +79,10 @@ module.exports.refactor = async (users) => {
             toDoList = toDoList.map((unit) => {
                 return {
                     affair: unit,
-                    date: Date.now()
+                    date: "0 Января"
                 }
             });
-            modelBd.refactor(user, toDoList);
+            modelMyself.refactor(user, toDoList);
             message.push(`${user} ИЗМЕНЕН`);
 
         }
@@ -158,13 +153,19 @@ module.exports.garbageCollector = async (userId) => {
 /**
  * Декоратор вывода листа самооценок в бота
  * @param affairs
- * @returns {*}
+ * @returns {Promise<*>}
  */
-function botDecorator(affairs){
-    let i = 1;
-    return affairs.map((affair) => {
-        return `${i++}- ${affair}`;
-    });
+async function botDecorator(userId, affairs){
+    try{
+        const showDate = await modelUser.get(userId);
+        let i = 1;
+        return affairs.map((affair) => {
+            return `${i++}- ${showDate.showDate ?'"' + affair.date + '"' : ''} ${affair.affair}`;
+        });
+    }catch (err) {
+        throw err;
+    }
+
 }
 
 /**

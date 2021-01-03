@@ -25,7 +25,7 @@ module.exports.addAffair = async (userId, data) => {
     }
     userAffairs.affairs.push({
         affair: data,
-        date: Date.now()
+        date: dateDecorator(Date.now())
     });
     try {
         await userAffairs.save();
@@ -85,4 +85,16 @@ module.exports.refactor = async (userId, data) => {
     } catch (err) {
         throw new Error('Ошибка при сохранении в базу данных');
     }
+}
+
+/**
+ * Декорирует таймштамп в красивую дату
+ * @param timeStamp
+ * @returns {string}
+ */
+function dateDecorator(timeStamp){
+    const date = new Date(timeStamp);
+    const months = ["Января", "Февраля", "Марта", "Апреля", "Мая",
+        "Июня", "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря"];
+    return date.getDate() + ' ' + months[date.getMonth()];
 }
