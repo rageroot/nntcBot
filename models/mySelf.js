@@ -44,7 +44,7 @@ module.exports.clearAffair = async (userId) => {
     if(!userAffairs){
         throw new Error('Не могу найти записи в базе данных');
     }
-    userAffairs.affairs.length = 0;
+    userAffairs.affairs.splice(0, userAffairs.affairs.length);
     try {
         await userAffairs.save();
     } catch (err) {

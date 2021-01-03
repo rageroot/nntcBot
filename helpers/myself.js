@@ -27,25 +27,17 @@ module.exports.list = async (userId, userName) => {
  * Добавляет новое дело в файл и созадет его, если файла нет.
  * @param userId
  * @param userName
- * @param business
+ * @param affair
  * @returns {Promise<unknown>}
  */
-module.exports.new = async (userId, userName, business) => {
+module.exports.new = async (userId, userName, affair) => {
     return new Promise( async (resolve, reject)=>{
-        const myselfListFile = './myself_lists/' + userId + '.txt';
-        let toDoList = [];
-
-        try{
-            let myselfListData = await readFile(myselfListFile, "");
-            toDoList = JSON.parse(myselfListData);
-            toDoList.push(business);
+        try {
+            await modelMyself.addAffair(userId, affair);
+            resolve(userName + ", твое дело учтено!");
         }catch (err) {
-            toDoList.push(business);
+            reject(new Error(err.message));
         }
-
-        writeFile(myselfListFile, JSON.stringify(toDoList), "Не могу добавить новое дело")
-            .then(resolve(userName + ", твое дело учтено!"))
-            .catch(err => reject(err));
     });
 };
 
@@ -55,14 +47,13 @@ module.exports.new = async (userId, userName, business) => {
  * @returns {Promise<unknown>}
  */
 module.exports.clear =  async (userId) => { //просто удаляет файл
-    return new Promise( (resolve, reject)=> {
-        const filename = './myself_lists/' + userId + '.txt';
-        fs.unlink(filename, (err) => {
-            if (err) {
-                reject(new Error("Не могу удалить файл"));
-            }
+    return new Promise( async (resolve, reject)=> {
+        try{
+            await modelMyself.clearAffair(userId);
             resolve("Нет у вас больше дел");
-        });
+        }catch (err) {
+            reject(new Error(err.message))
+        }
     });
 }
 
