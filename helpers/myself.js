@@ -96,17 +96,15 @@ module.exports.refactor = async (users) => {
 module.exports.getMyselfFile = async (userId) => { //находимся в корне проекта
     return new Promise(async (resolve, reject) => {
         const templateDirectory = `tmp/${userId}_self`; //здесь разобраный шаблон одт tmpPath
-        const myselfFile = './myself_lists/' + userId + '.txt'; //здесь лежат наши важные дела filename
         const templateFile = `./${templateDirectory}/content.xml`; //файл с текстовым содержимым одт tmpFile
         let toDoList = [];  //массив, где я формирую будущую верстку
 
         try {
             await mkDir(templateDirectory);
             await cpTemplate(templateDirectory);
-            const myselfFileData = await readFile(myselfFile, "У вас нет самооценки");
+            const myselfData = await modelMyself.get(userId);
 
-            toDoList = JSON.parse(myselfFileData);
-            toDoList = fileDecorator(toDoList);   //декорирую под запись в файл
+            toDoList = await fileDecorator(userId, myselfData.affairs);   //декорирую под запись в файл
             toDoList.push("</office:text></office:body></office:document-content>");
 
             let templateFileData = await readFile(templateFile, "Файл шаблона не был создан");
@@ -161,14 +159,21 @@ async function botDecorator(userId, affairs){
 
 /**
  * Декоратор вывода листа самооценок в файл
+ * @param userId
  * @param affairs
- * @returns {*}
+ * @returns {Promise<*>}
  */
-function fileDecorator(affairs){
-    let i = 1;
-    return affairs.map((affair) => {
-        return `<text:p text:style-name="P${i++}">-${affair}</text:p>`; //одтшная верстка
-    });
+async function fileDecorator(userId, affairs){
+    try{
+        const showDate = await modelUser.get(userId);
+        let i = 1;
+        return affairs.map((affair) => {
+            return `<text:p text:style-name="P${i++}">- ${showDate.showDate ?'"' 
+                + affair.date + '"' : ''} ${affair.affair}</text:p>`; //одтшная верстка
+        });
+    }catch (err) {
+        throw err;
+    }
 }
 
 
