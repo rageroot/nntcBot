@@ -11,7 +11,7 @@ const Affair = mongoose.model('mySelf', mySelfSchema);
 /**
  * Создает новый документ в коллекции или редактирует существующий
  * @param userId
- * @param Новое дело
+ * @param data Новое дело
  * @returns {Promise<void>}
  */
 module.exports.addAffair = async (userId, data) => {
@@ -58,10 +58,9 @@ module.exports.clearAffair = async (userId) => {
  * @returns {Promise<unknown>}
  */
 module.exports.get = (userId) => {
-    return new Promise(resolve => {
-       Affair.findOne({userId: userId}, (err, data) => {
-           resolve(data);
-       });
+    return new Promise(async (resolve) => {
+       const response = await Affair.findOne({userId: userId});
+       resolve(response);
     });
 }
 

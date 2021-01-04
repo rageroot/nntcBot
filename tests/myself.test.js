@@ -1,8 +1,29 @@
 const myself = require("../helpers/myself");
 const fs = require("fs");
 const child_process = require('child_process');
+const modelMyself = require('../models/mySelf');
+const modelUser = require('../models/users');
+const mongoose = require('mongoose');
 
 const testData = "[\"test1\",\"test2 test2\",\"test3 test3 test3\"]";
+const testModelMyselfResponse = {
+    userId: 12345,
+    affairs: [
+        {
+            affair: 'Тестовое дело 1',
+            date: '11 января'
+        },
+        {
+            affair: 'Тестовое дело 2',
+            date: '12 января'
+        },
+        {
+            affair: 'Тестовое дело 3',
+            date: '13 января'
+        }
+    ]
+};
+
 let readFileCallback;
 
 const readFileSpy = jest.spyOn(fs, 'readFile');
@@ -11,30 +32,60 @@ const unlinkSpy = jest.spyOn(fs, 'unlink');
 const mkdirSpy = jest.spyOn(fs, 'mkdir');
 const execSpy = jest.spyOn(child_process, 'exec');
 const JSONparse = jest.spyOn(JSON, 'parse');
+const dateNowSpy = jest.spyOn(Date, 'now');
+const modelMyselfGetSpy = jest.spyOn(modelMyself, 'get');
+const modelUserGetSpy = jest.spyOn(modelUser, 'get');
 
+beforeAll(async () => {
+    await mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true, useUnifiedTopology: true });
+    await modelUser.newUser(12345);
+});
 
 afterEach(() => {
     jest.clearAllMocks();
 });
 
-afterAll(() => {
+afterAll(async () => {
     jest.restoreAllMocks();
+    await dropAllCollections();
+    await mongoose.connection.close();
 });
 
 describe("Helper \"myself\"", () => {
     describe("Function \"list\"", () => {
-            readFileSpy.mockImplementationOnce((path, callback) => {
-                readFileCallback = callback;
-                callback(null, testData);
-            }).mockImplementationOnce((path, callback) => {
-                callback(new Error("Jest test error"), null);
-            });
+        afterAll(() => {
+            modelMyselfGetSpy.mockRestore();
+        });
 
-        test("normal Data",  async () => {
+        modelMyselfGetSpy.mockImplementation((userId) => {
+            return testModelMyselfResponse;
+        });
+
+        modelUserGetSpy.mockImplementationOnce((userId) => {
+            return {
+                userId: 12345,
+                showDate: false
+            }
+        }).mockImplementationOnce((userId) => {
+            return {
+                userId: 12345,
+                showDate: true
+            }
+        }).mockImplementationOnce((userId) => {
+            return new Error('Jest test error');
+        });
+
+        test("normal data without date",  async () => {
             const r = await myself.list(12345, 'testUser');
-            expect(readFileSpy).toBeCalledWith('./myself_lists/12345.txt', readFileCallback);
-            expect(r).toContain("1- test1");
-            expect(r).toContain("3- test3 test3 test3");
+            expect(r).toContain("1- Тестовое дело 1");
+            expect(r).toContain("3- Тестовое дело 3");
+            expect(r).toContain("testUser, ты успел натворить:");
+        });
+
+        test("normal data with date",  async () => {
+            const r = await myself.list(12345, 'testUser');
+            expect(r).toContain("1- \"11 января\" Тестовое дело 1");
+            expect(r).toContain("3- \"13 января\" Тестовое дело 3");
             expect(r).toContain("testUser, ты успел натворить:");
         });
 
@@ -42,54 +93,40 @@ describe("Helper \"myself\"", () => {
             try {
                 const r = await myself.list(12345, 'testUser');
             }catch (err) {
-                expect(err.message).toContain("У вас нет самооценки");
+                expect(err.message).toContain("Jest test error");
             }
-            expect(JSONparse.mock.calls.length).toBe(0);
         });
     });
 
     describe("Function \"new\"", () => {
-            readFileSpy.mockImplementationOnce((path, callback) => {
-                readFileCallback = callback;
-                callback(null, testData);
-            }).mockImplementation((path, callback) => {
-                readFileCallback = callback;
-                callback(new Error("file not exist"), null);
-            });
-
-            writeFileSpy.mockImplementation((path, data, cb) =>{
-                cb(null);
-            });
-
-        test("normalData, myselfFile exist", async () => {
-            const result = await myself.new(12345, 'testUser', 'any 1 2 3');
-
-            expect(readFileSpy).toBeCalledWith('./myself_lists/12345.txt', readFileCallback);
-            expect(writeFileSpy).toHaveBeenCalled();
-            expect(result).toBe("testUser, твое дело учтено!");
-            expect(writeFileSpy.mock.calls[0][0]).toBe('./myself_lists/12345.txt');
-            expect(writeFileSpy.mock.calls[0][1]).toBe("[\"test1\",\"test2 test2\",\"test3 test3 test3\",\"any 1 2 3\"]");
+        dateNowSpy.mockImplementation(() => {
+            return new Date('2021-01-01T07:00:00');
         });
 
-        test("normalData, myselfFile not exist", async () => {
+        test("normalData, bd is empty", async (done) => {
             const result = await myself.new(12345, 'testUser', 'any 1 2 3');
 
-            expect(readFileSpy).toBeCalledWith('./myself_lists/12345.txt', readFileCallback);
-            expect(writeFileSpy).toHaveBeenCalled();
+            const bdResponse = await modelMyself.get(12345);
+
             expect(result).toBe("testUser, твое дело учтено!");
-            expect(writeFileSpy.mock.calls[0][0]).toBe('./myself_lists/12345.txt');
-            expect(writeFileSpy.mock.calls[0][1]).toBe("[\"any 1 2 3\"]");
+            expect(bdResponse.userId).toBe(12345);
+            expect(bdResponse.affairs[0].affair).toBe('any 1 2 3');
+            expect(bdResponse.affairs[0].date).toBe('1 Января');
+            done();
         });
 
-        test("writeFile Error", () => {
-            writeFileSpy.mockImplementation((path, data, cb) =>{
-                cb(new Error("Jest test Error"));
-            });
+        test("normalData, bd have one entry", async (done) => {
+            const result = await myself.new(12345, 'testUser', '3 2 1 yna');
 
-            myself.new(12345, 'testUser', 'any 1 2 3')
-                .catch((err) => {
-                    expect(err.message).toBe("Не могу добавить новое дело");
-                });
+            const bdResponse = await modelMyself.get(12345);
+
+            expect(result).toBe("testUser, твое дело учтено!");
+            expect(bdResponse.userId).toBe(12345);
+            expect(bdResponse.affairs[0].affair).toBe('any 1 2 3');
+            expect(bdResponse.affairs[0].date).toBe('1 Января');
+            expect(bdResponse.affairs[1].affair).toBe('3 2 1 yna');
+            expect(bdResponse.affairs[1].date).toBe('1 Января');
+            done();
         });
     });
 
@@ -238,3 +275,16 @@ describe("Helper \"myself\"", () => {
         });
     });
 });
+
+
+async function dropAllCollections () {
+    const collections = Object.keys(mongoose.connection.collections)
+    for (const collectionName of collections) {
+        const collection = mongoose.connection.collections[collectionName]
+        try {
+            await collection.drop()
+        } catch (err) {
+            console.log(err.message);
+        }
+    }
+}

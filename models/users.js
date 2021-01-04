@@ -34,6 +34,25 @@ module.exports.dateDisplay = async (userId, show) => {
     }
 }
 
+/**
+ * Добавить нового пользователя в базу
+ * @param userId
+ * @returns {Promise<void>}
+ */
+module.exports.newUser = async (userId) => {
+    const user = new Users(
+        {
+            userId: userId,
+        }
+    );
+
+    try {
+        await user.save();
+    } catch (err) {
+        throw new Error('Ошибка при сохранении в базу данных');
+    }
+}
+
 
 /**
  * требуется чтобы один раз заполнить базу

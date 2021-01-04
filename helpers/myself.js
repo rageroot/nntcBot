@@ -139,22 +139,19 @@ module.exports.garbageCollector = async (userId) => {
     });
 }
 
+
 /**
  * Декоратор вывода листа самооценок в бота
+ * @param userId
  * @param affairs
  * @returns {Promise<*>}
  */
 async function botDecorator(userId, affairs){
-    try{
-        const showDate = await modelUser.get(userId);
-        let i = 1;
-        return affairs.map((affair) => {
-            return `${i++}- ${showDate.showDate ?'"' + affair.date + '"' : ''} ${affair.affair}`;
-        });
-    }catch (err) {
-        throw err;
-    }
-
+    const showDate = await modelUser.get(userId);
+    let i = 1;
+    return affairs.map((affair) => {
+        return `${i++}- ${showDate.showDate ?'"' + affair.date + '" ' : ''}${affair.affair}`;
+    });
 }
 
 /**

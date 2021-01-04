@@ -8,7 +8,8 @@
     "test": "jest"
   },
   "jest": {
-    "collectCoverage": true
+    "collectCoverage": true,
+    "testEnvironment": "node"
   },
   "keywords": [],
   "author": "",
