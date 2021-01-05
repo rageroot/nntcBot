@@ -147,11 +147,15 @@ module.exports.garbageCollector = async (userId) => {
  * @returns {Promise<*>}
  */
 async function botDecorator(userId, affairs){
-    const showDate = await modelUser.get(userId);
-    let i = 1;
-    return affairs.map((affair) => {
-        return `${i++}- ${showDate.showDate ?'"' + affair.date + '" ' : ''}${affair.affair}`;
-    });
+    try{
+        const showDate = await modelUser.get(userId);
+        let i = 1;
+        return affairs.map((affair) => {
+            return `${i++}- ${showDate.showDate ?'"' + affair.date + '" ' : ''}${affair.affair}`;
+        });
+    }catch (err) {
+        throw err;
+    }
 }
 
 /**
