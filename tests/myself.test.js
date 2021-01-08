@@ -132,8 +132,8 @@ describe("Helper \"myself\"", () => {
             done();
         });
 
-      /*  test("save error", async () => {
-            mongooseSaveSpy.mockImplementationOnce(() => {
+        test("save error", async () => {
+            dateNowSpy.mockImplementationOnce(() => {
                 return new Error('Jest test error');
             });
 
@@ -141,18 +141,26 @@ describe("Helper \"myself\"", () => {
             catch((err) => {
                 expect(err.message).toContain("Jest test error");
             });
-        });*/
+        });
     });
 
     describe("Function \"clear\"", () => {
 
         test("Normal behavior", async () => {
-            const result = await myself.clear("12345");
+            const result = await myself.clear(12345);
 
             const bdResponse = await modelMyself.get(12345);
 
             expect(bdResponse.affairs.length).toBe(0);
             expect(result).toBe("Нет у вас больше дел");
+        });
+        
+        test('Mistbehavior', async () => {
+            try{
+                await myself.clear(54321);
+            }catch (err) {
+                expect(err.message).not.toBeNaN();
+            }
         });
 
     });
