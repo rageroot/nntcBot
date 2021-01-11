@@ -231,9 +231,10 @@ bot.command('open_m', async (ctx) => {
 });
 
 //Когда то код был нужен для рефакторинга хранимых данных. Возможно, еще понадобиться
-bot.command('ref', async (ctx) => {
+//
+/*bot.command('ref', async (ctx) => {
     await ctx.reply(await myself.refactor(cfg.VALID_USERS));
-});
+});*/
 
 /**
  * Включает и выключает режим вывода дат в листах самооценки

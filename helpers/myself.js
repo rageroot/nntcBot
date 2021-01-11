@@ -59,7 +59,7 @@ module.exports.clear =  async (userId) => { //просто удаляет фай
 
 //Требовался только один раз, по этому заглушка
 //потребовался второй раз, но все равно заглушка
-module.exports.refactor = async (users) => {
+/*module.exports.refactor = async (users) => {
     const message = [];
     users.forEach((user) => {
         const filename = './myself_lists/' + user + '.txt';
@@ -86,7 +86,7 @@ module.exports.refactor = async (users) => {
         resolve(message.join('\n'))});
     //return "Заглушка";
 
-}
+}*/
 
 /**
  * Генерирует файл с листом самооценки
