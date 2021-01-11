@@ -56,8 +56,9 @@ bot.use(async (ctx, next) => {
 
 /**
  * отсекаю невалидных пользователей
+ * Отключил на кое какое время ;-)
  */
-bot.use(async (ctx, next) => {
+/*bot.use(async (ctx, next) => {
     strings.textConstants.ACCESS_DENIED_MESSAGE = userName + ', Вам доступ запрещён. Сообщите ваш ID для добавления полномочий: ' + userId;
 
     if (cfg.VALID_USERS.indexOf(userId) === -1) {
@@ -66,7 +67,7 @@ bot.use(async (ctx, next) => {
     else {
         await next();
     }
-});
+});*/
 
 /**
  * скорость выполнения запросов. По умолчанию не используется
