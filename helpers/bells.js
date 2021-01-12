@@ -76,8 +76,16 @@ module.exports.info = () => {
 			case 0:
 				currentState = "Сегодня выходной";
 				break;
-			case 8:				//заглушка для субботы
-				break;
+			case 6:				//коррекция расписания под субботу
+				markup[2] = '<b>3 пара:</b> 11:30 - 13:00';
+				markup.length = 3;
+				markupTime[3].stopMinuts = 690;
+				markupTime[4].stopMinuts = 780;
+				markupTime.length = 5;
+				if(minutes > markupTime[4].stopMinuts){
+					currentState = "Уже слишком поздно";
+					break
+				}
 			default:			//рабочая неделя
 				for(let i = 0; i < markupTime.length; ++i){			//смотрим какое сейчас событие
 					if(minutes - markupTime[i].stopMinuts < 0){
