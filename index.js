@@ -13,6 +13,7 @@ const myself = require('./helpers/myself');
 const report = require('./helpers/report-generator');
 const bd = require('./models/botBd');
 const userModel = require('./models/users');
+
 // const easterEggs = require('./helpers/easterEggs');
 // const kursGen = require('./helpers/wizard-kurs-report-generator');
 
@@ -68,6 +69,18 @@ bot.use(async (ctx, next) => {
         await next();
     }
 });*/
+
+/**
+ * Каждый раз проверка, что пользователь есть в базе данных
+ */
+bot.use(async (ctx,next) => {
+    const user = await userModel.get(userId);
+    if(!user){
+        await userModel.newUser(userId);
+    }
+    await next();
+});
+
 
 /**
  * скорость выполнения запросов. По умолчанию не используется

@@ -60,6 +60,7 @@ module.exports.newUser = async (userId) => {
  * @param data
  * @returns {Promise<void>}
  */
+/*
 module.exports.refactor = async (userId, data) => {
     const user = new Users(
         {
@@ -73,3 +74,4 @@ module.exports.refactor = async (userId, data) => {
         throw new Error('Ошибка при сохранении в базу данных');
     }
 }
+*/
