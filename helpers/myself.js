@@ -16,9 +16,11 @@ module.exports.list = async (userId, userName) => {
             const queryMyself = await modelMyself.get(userId);
             toDoList = await botDecorator(userId, queryMyself.affairs);
             toDoList.unshift(userName + ", ты успел натворить:");
+            toDoList.push(1);
+            console.log(toDoList);
             resolve(toDoList.join('\n'));
         }catch (err) {
-            reject(err.message);
+            reject(new Error('Не могу показать твой лист, дружочек =('));
         }
     });
 };
