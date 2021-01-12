@@ -9,69 +9,69 @@ module.exports.info = () => {
 	let currentState = "";
 
 	let markup = [
-		'<b>1 пара:</b> 08:00 - 09:30',
-		'<b>2 пара:</b> 09:40 - 11:10',
-		'<b>3 пара:</b> 11:30 - 13:00',
-		'<b>4 пара:</b> 13:10 - 14:40',
-		'<b>5 пара:</b> 14:50 - 16:20',
-		'<b>6 пара:</b> 16:30 - 18:00',
+		'<b>1 пара:</b> 08:10 - 09:40',
+		'<b>2 пара:</b> 09:50 - 11:20',
+		'<b>3 пара:</b> 11:40 - 13:10',
+		'<b>4 пара:</b> 13:20 - 14:50',
+		'<b>5 пара:</b> 15:00 - 16:30',
+		'<b>6 пара:</b> 16:40 - 18:10',
 	];
 
 	const markupTime = [		//точность до секунд не важна, используются минуты, прошедшие с начала суток
 		{
 			description: "1 пара",
-			stopMinuts: 570,
-		},
-		{
-			description: "1 перемена",
 			stopMinuts: 580,
 		},
 		{
+			description: "1 перемена",
+			stopMinuts: 590,
+		},
+		{
 			description: "2 пара",
-			stopMinuts: 670,
+			stopMinuts: 680,
 		},
 		{
 			description: "2 перемена",
-			stopMinuts: 690,
+			stopMinuts: 700,
 		},
 		{
 			description: "3 пара",
-			stopMinuts: 780,
-		},
-		{
-			description: "3 перемена",
 			stopMinuts: 790,
 		},
 		{
-			description: "4 пара",
-			stopMinuts: 880,
+			description: "3 перемена",
+			stopMinuts: 800,
 		},
 		{
-			description: "4 перемена",
+			description: "4 пара",
 			stopMinuts: 890,
 		},
 		{
-			description: "5 пара",
-			stopMinuts: 980,
+			description: "4 перемена",
+			stopMinuts: 900,
 		},
 		{
-			description: "5 перемена",
+			description: "5 пара",
 			stopMinuts: 990,
 		},
 		{
+			description: "5 перемена",
+			stopMinuts: 1000,
+		},
+		{
 			description: "6 пара",
-			stopMinuts: 1080,
+			stopMinuts: 1090,
 		},
 	];
 
-	if((currentHours < 8) || (currentHours > 18) && dateNow.getDay() != 0) {
-		if(currentHours < 8)
+	const minutes = currentHours * 60 + dateNow.getMinutes(); //текущее количество минут с начала дня
+	if((minutes < 490) || (minutes > 1090) && dateNow.getDay() != 0) {
+		if(minutes < 490)
 			currentState = "Еще слишком рано";
 		else
 			currentState = "Уже слишком поздно";
 	}
 	else{
-		const minutes = currentHours * 60 + dateNow.getMinutes(); //текущее количество минут с начала дня
 		switch (dateNow.getDay()) { //смотрим на расписание, в зависимости от дня недели
 			case 0:
 				currentState = "Сегодня выходной";

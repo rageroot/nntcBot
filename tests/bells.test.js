@@ -15,7 +15,7 @@ describe("Helper \"bells\"", () => {
     });
 
     test("Before class", async () => {
-        nextTime = 65;
+        nextTime = 75;
         const bellsRequest = await bells.info();
         expect(bellsRequest).toContain("Еще слишком рано");
         expect(bellsRequest).not.toContain("==>");
@@ -25,7 +25,7 @@ describe("Helper \"bells\"", () => {
         nextTime = 90;
         const bellsRequest = await bells.info();
         expect(bellsRequest).toContain("Сейчас 1 пара, до конца 85 минут");
-        expect(bellsRequest).toContain("==> <b>1 пара:</b> 08:00 - 09:30");
+        expect(bellsRequest).toContain("==> <b>1 пара:</b> 08:10 - 09:40");
     });
 
     test("1 change", async () => {
@@ -39,7 +39,7 @@ describe("Helper \"bells\"", () => {
         nextTime = 90;
         const bellsRequest = await bells.info();
         expect(bellsRequest).toContain("Сейчас 2 пара, до конца 85 минут");
-        expect(bellsRequest).toContain("==> <b>2 пара:</b> 09:40 - 11:10");
+        expect(bellsRequest).toContain("==> <b>2 пара:</b> 09:50 - 11:20");
     });
 
     test("2 change", async () => {
@@ -50,7 +50,7 @@ describe("Helper \"bells\"", () => {
     });
 
     test("After class", async () => {
-        nextTime = 4300;
+        nextTime = 4100;
         const bellsRequest = await bells.info();
         expect(bellsRequest).toContain("Уже слишком поздно");
         expect(bellsRequest).not.toContain("==>");

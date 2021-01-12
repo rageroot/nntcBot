@@ -18,12 +18,6 @@ const userModel = require('./models/users');
 // const kursGen = require('./helpers/wizard-kurs-report-generator');
 
 
-/*const bot = new Telegraf(cfg.TG_TOKEN, {
-    telegram: {
-        agent: new HttpsProxyAgent('http://svg:svgpassw0rd@vslugin.ru:3128')
-    }
-});*/
-
 const bot = new Telegraf(cfg.TG_TOKEN);
 bd.connect();
 /**
@@ -122,26 +116,6 @@ bot.use(async (ctx, next) => {
 
 // ######## Middleware ###########
 
-/*async function test(){
-    let awaitPromise = new Promise(resolve => {
-        setTimeout(() => {
-            resolve("timeOut");
-        }, 2000);
-    });
-    console.log(await awaitPromise);
-    console.log("endOfFunction");
-
-    let promise = new Promise(resolve => {
-        setTimeout(() => {
-            resolve("ok");
-        }, 2000);
-        console.log("EndOfPtomise");
-    });
-
-    promise.then(() => {
-        console.log("TimeOutProimise");
-    });
-}*/
 
 /**
  * выводит приветсвенное сообщение и основную клавиатуру
@@ -424,10 +398,3 @@ process.on("uncaughtException",(err) => {
     console.log("Все паламалась!!!");
     console.log(err.message);
 });
-/*
-* Запаковать: zip file.odt -r *
-  Распаковать в директорию: unzip template.odt -d e
-*
-* */
-
-// Jest
