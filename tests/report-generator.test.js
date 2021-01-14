@@ -9,6 +9,7 @@ const testData = require('resources/report-generator.inputData');
 const childProcessExecSpy = jest.spyOn(child_process, 'exec');
 const fsPromiseMkDirSpy = jest.spyOn(fsPromises, 'mkdir');
 const fsPromiseReadFileSpy = jest.spyOn(fsPromises, 'readFile');
+const fsPromiseWriteFileSpy = jest.spyOn(fsPromises, 'writeFile');
 const fsCreateWriteStreamSpy = jest.spyOn(fs, 'createWriteStream');
 
 jest.mock('axios');
@@ -57,6 +58,8 @@ describe("Function \"report-generator\", simple functions", () => {
 
 describe("Function \"report-generator\", generator", () => {
     test('normal behavior', async () => {
+        let dataAfterTransformation;
+
         fsPromiseMkDirSpy.mockImplementation((path) => {
             return new Promise((resolve => {
                 resolve();
@@ -73,9 +76,17 @@ describe("Function \"report-generator\", generator", () => {
 
         fsPromiseReadFileSpy
             .mockResolvedValueOnce(testData.INPUT_FILE_NORMAL)
-            .mockResolvedValueOnce(testData.CONTENT_XML);
+            .mockResolvedValueOnce(testData.CONTENT_XML)
+            .mockResolvedValueOnce(dataAfterTransformation);
 
-        childProcessExecSpy.mockImplementationOnce((command, cb) => {
+        fsPromiseWriteFileSpy.mockImplementationOnce((path, data) => {
+            dataAfterTransformation = data;
+            return new Promise(resolve => {
+                resolve();
+            });
+        });
+
+        childProcessExecSpy.mockImplementation((command, cb) => {
             cb(null);
         });
 
@@ -90,6 +101,13 @@ describe("Function \"report-generator\", generator", () => {
         expect(fsCreateWriteStreamSpy.mock.calls[0][0]).toBe(`tmp/${userId}_reports/inputFile.txt`);
         expect(child_process.mock.calls[0][0]).toBe(`odt_templates/reportsGenerator/odtHarTemplate`);
         expect(child_process.mock.calls[0][1]).toBe(`tmp/${userId}_reports/templateWithGeneralData`);
-
+        expect(fsPromiseReadFileSpy.mock.calls[0][0]).toBe(`tmp/${userId}_reports/inputFile.txt`);
+        expect(fsPromiseReadFileSpy.mock.calls[1][0]).toBe(`tmp/${userId}_reports/templateWithGeneralData/content.xml`);
+        expect(fsPromiseWriteFileSpy.mock.calls[0][0]).toBe(`tmp/${userId}_reports/templateWithGeneralData/content.xml`);
+        /*вот сюда напихать проверок правильности замены в шаблоне  expect(fsPromiseWriteFileSpy.mock.calls[0][1])*/
+        expect(childProcessExecSpy.mock.calls[1][0]).toBe(`tmp/${userId}_reports/templateWithGeneralData/content.xml`);
+        expect(childProcessExecSpy.mock.calls[1][1]).toBe(`tmp/${userId}_reports/content.xml`);
+        expect(childProcessExecSpy.mock.calls[2][0]).toBe(`tmp/${userId}_reports/content.xml`);
+        expect(childProcessExecSpy.mock.calls[2][1]).toBe(`tmp/${userId}_reports/templateWithGeneralData/content.xml`);
     });
 });
