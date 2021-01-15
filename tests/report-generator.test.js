@@ -99,15 +99,16 @@ describe("Function \"report-generator\", generator", () => {
         expect(fsPromiseReadFileSpy.mock.calls[0][0]).toBe(`tmp/${userId}_reports/inputFile.txt`);
         expect(fsPromiseReadFileSpy.mock.calls[1][0]).toBe(`tmp/${userId}_reports/templateWithGeneralData/content.xml`);
         expect(fsPromiseWriteFileSpy.mock.calls[0][0]).toBe(`tmp/${userId}_reports/templateWithGeneralData/content.xml`);
-        /*вот сюда напихать проверок правильности замены в шаблоне  expect(fsPromiseWriteFileSpy.mock.calls[0][1])*/
+        expect(fsPromiseWriteFileSpy.mock.calls[1][1]).toBe(testData.STUDENTS_CORRECT_OUTPUT);
         expect(childProcessExecSpy.mock.calls[1][0]).toBe(`cd tmp/${userId}_reports/templateWithGeneralData;zip -0 -r ../\'outcome/Богатов Михаил.odt\' *`);
         expect(childProcessExecSpy.mock.calls[2][0]).toContain('Васин Александр');
         expect(childProcessExecSpy.mock.calls[3][0]).toContain('Вишняков Олег');
         expect(childProcessExecSpy.mock.calls[4][0]).toBe(`cp -r odt_templates/reportsGenerator/odtOtchRukTemplate tmp/${userId}_reports/teacherReport`);
         expect(fsPromiseWriteFileSpy.mock.calls[3][0]).toBe(`tmp/${userId}_reports/teacherReport/content.xml`);
-        /*вот сюда напихать проверок правильности замены в шаблоне  expect(fsPromiseWriteFileSpy.mock.calls[0][1])*/
+        expect(fsPromiseWriteFileSpy.mock.calls[3][1]).toBe(testData.TEACHERS_CORRECT_OUTPUT);
         expect(childProcessExecSpy.mock.calls[5][0]).toBe(`cd tmp/${userId}_reports/teacherReport;zip -0 -r ../'outcome/teacherReport.odt' *`);
         expect(childProcessExecSpy.mock.calls[6][0]).toBe(`cd tmp/${userId}_reports/outcome;7z a -tzip ../\'5РА-16-1уп.zip\'`);
         expect(result).toBe(`tmp/${userId}_reports/5РА-16-1уп.zip`);
     });
 });
+//https://dev.to/cdanielsen/testing-streams-a-primer-3n6e
