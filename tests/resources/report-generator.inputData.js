@@ -18,7 +18,7 @@ module.exports.INPUT_FILE_NORMAL = "Группа: 5РА-16-1уп;\n" +
     "Студент: Вишняков Олег;\n" +
     "Оценка: 2;";
 
-module.exports.CONTENT_XML =
+module.exports.STUDENTS_CONTENT_XML =
     "$group$\n" +
     "$codeSpec$\n" +
     "$specGroup$\n" +
@@ -37,3 +37,22 @@ module.exports.CONTENT_XML =
     "$thr$\n" +
     "$tw$\n" +
     "$scale$\n";
+
+module.exports.TEACHERS_CONTENT_XML =
+    "$group$\n" +
+    "$codeSpec$\n" +
+    "$specGroup$\n" +
+    "$pModule$\n" +
+    "$startDate$\n" +
+    "$endDate$\n" +
+    "$leader$\n" +
+    "$course$\n" +
+    "$hours$\n" +
+    "$studentsCount$\n" +
+    "$five$\n" +
+    "$four$\n" +
+    "$three$\n" +
+    "$two$\n" +
+    "$procUsp$\n" +
+    "$procKach$\n";
+

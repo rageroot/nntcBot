@@ -4,7 +4,7 @@ const fsPromises = require('fs').promises;
 const fs = require('fs');
 const axios = require('axios');
 const { PassThrough } = require('stream');
-const testData = require('resources/report-generator.inputData');
+const testData = require('../tests/resources/report-generator.inputData');
 
 const childProcessExecSpy = jest.spyOn(child_process, 'exec');
 const fsPromiseMkDirSpy = jest.spyOn(fsPromises, 'mkdir');
@@ -58,8 +58,6 @@ describe("Function \"report-generator\", simple functions", () => {
 
 describe("Function \"report-generator\", generator", () => {
     test('normal behavior', async () => {
-        let dataAfterTransformation;
-
         fsPromiseMkDirSpy.mockImplementation((path) => {
             return new Promise((resolve => {
                 resolve();
@@ -69,22 +67,20 @@ describe("Function \"report-generator\", generator", () => {
         /***********function downloadFile***************/
         const mockWriteable = new PassThrough();
         const mockReadable = new PassThrough();
-        axios.get.mockResolvedValue(mockReadable);
+        const fakeReadStream = {
+            data: mockReadable
+        };
+        axios.get.mockResolvedValue(fakeReadStream);
 
         fsCreateWriteStreamSpy.mockReturnValueOnce(mockWriteable);
         /***********function downloadFile**************/
 
         fsPromiseReadFileSpy
             .mockResolvedValueOnce(testData.INPUT_FILE_NORMAL)
-            .mockResolvedValueOnce(testData.CONTENT_XML)
-            .mockResolvedValueOnce(dataAfterTransformation);
+            .mockResolvedValueOnce(testData.STUDENTS_CONTENT_XML)
+            .mockResolvedValueOnce(testData.TEACHERS_CONTENT_XML);
 
-        fsPromiseWriteFileSpy.mockImplementationOnce((path, data) => {
-            dataAfterTransformation = data;
-            return new Promise(resolve => {
-                resolve();
-            });
-        });
+        fsPromiseWriteFileSpy.mockResolvedValue('done');
 
         childProcessExecSpy.mockImplementation((command, cb) => {
             cb(null);
@@ -97,17 +93,21 @@ describe("Function \"report-generator\", generator", () => {
         const result = await reportGenerator.generate(userId, {file_path: 'test.txt'});
 
         expect(fsPromiseMkDirSpy.mock.calls[0][0]).toBe(`tmp/${userId}_reports`);
-        expect(fsPromiseMkDirSpy.mock.calls[0][0]).toBe(`tmp/${userId}_reports/outcome`);
+        expect(fsPromiseMkDirSpy.mock.calls[1][0]).toBe(`tmp/${userId}_reports/outcome`);
         expect(fsCreateWriteStreamSpy.mock.calls[0][0]).toBe(`tmp/${userId}_reports/inputFile.txt`);
-        expect(child_process.mock.calls[0][0]).toBe(`odt_templates/reportsGenerator/odtHarTemplate`);
-        expect(child_process.mock.calls[0][1]).toBe(`tmp/${userId}_reports/templateWithGeneralData`);
+        expect(childProcessExecSpy.mock.calls[0][0]).toBe(`cp -r odt_templates/reportsGenerator/odtHarTemplate tmp/${userId}_reports/templateWithGeneralData`);
         expect(fsPromiseReadFileSpy.mock.calls[0][0]).toBe(`tmp/${userId}_reports/inputFile.txt`);
         expect(fsPromiseReadFileSpy.mock.calls[1][0]).toBe(`tmp/${userId}_reports/templateWithGeneralData/content.xml`);
         expect(fsPromiseWriteFileSpy.mock.calls[0][0]).toBe(`tmp/${userId}_reports/templateWithGeneralData/content.xml`);
         /*вот сюда напихать проверок правильности замены в шаблоне  expect(fsPromiseWriteFileSpy.mock.calls[0][1])*/
-        expect(childProcessExecSpy.mock.calls[1][0]).toBe(`tmp/${userId}_reports/templateWithGeneralData/content.xml`);
-        expect(childProcessExecSpy.mock.calls[1][1]).toBe(`tmp/${userId}_reports/content.xml`);
-        expect(childProcessExecSpy.mock.calls[2][0]).toBe(`tmp/${userId}_reports/content.xml`);
-        expect(childProcessExecSpy.mock.calls[2][1]).toBe(`tmp/${userId}_reports/templateWithGeneralData/content.xml`);
+        expect(childProcessExecSpy.mock.calls[1][0]).toBe(`cd tmp/${userId}_reports/templateWithGeneralData;zip -0 -r ../\'outcome/Богатов Михаил.odt\' *`);
+        expect(childProcessExecSpy.mock.calls[2][0]).toContain('Васин Александр');
+        expect(childProcessExecSpy.mock.calls[3][0]).toContain('Вишняков Олег');
+        expect(childProcessExecSpy.mock.calls[4][0]).toBe(`cp -r odt_templates/reportsGenerator/odtOtchRukTemplate tmp/${userId}_reports/teacherReport`);
+        expect(fsPromiseWriteFileSpy.mock.calls[3][0]).toBe(`tmp/${userId}_reports/teacherReport/content.xml`);
+        /*вот сюда напихать проверок правильности замены в шаблоне  expect(fsPromiseWriteFileSpy.mock.calls[0][1])*/
+        expect(childProcessExecSpy.mock.calls[5][0]).toBe(`cd tmp/${userId}_reports/teacherReport;zip -0 -r ../'outcome/teacherReport.odt' *`);
+        expect(childProcessExecSpy.mock.calls[6][0]).toBe(`cd tmp/${userId}_reports/outcome;7z a -tzip ../\'5РА-16-1уп.zip\'`);
+        expect(result).toBe(`tmp/${userId}_reports/5РА-16-1уп.zip`);
     });
 });

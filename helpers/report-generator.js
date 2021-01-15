@@ -219,14 +219,9 @@ function createCharacteristics(info, paths){
             await cpTemplate(paths.reportsCharacteristicTemplate, `${paths.tmpFolderPath}/templateWithGeneralData`);
             const contentGeneralFile = await fsPromises.readFile(contentXmlPath);
             const totalsGeneral = await fillingCharacteristicsWithGeneralData(contentGeneralFile.toString(), info);
-            //await fsPromises.writeFile(contentXmlPath, totalsGeneral)
-
-            //await cpTemplate(contentXmlPath, `${paths.tmpFolderPath}/content.xml`);
 
             let index = 0;
             for(const student of info.students) {
-              //  await cpTemplate(`${paths.tmpFolderPath}/content.xml`, contentXmlPath);
-                //const contentFile = await fsPromises.readFile(contentXmlPath);
                 const totals = await fillingCharacteristicsWithUnicalsData(totalsGeneral, index, info);
                 await fsPromises.writeFile(contentXmlPath, totals)
                 await packer(`${paths.tmpFolderPath}/templateWithGeneralData`, `\'outcome/${info.students[index]}.odt\'`);
