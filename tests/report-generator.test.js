@@ -16,6 +16,19 @@ jest.mock('axios');
 
 userId = 12345;
 
+/***********function downloadFile***************/
+const mockWriteable = new PassThrough();
+mockWriteable.close = function (){};
+const mockReadable = new PassThrough();
+const fakeReadStream = {
+    data: mockReadable
+};
+
+axios.get.mockResolvedValue(fakeReadStream);
+fsCreateWriteStreamSpy.mockReturnValue(mockWriteable);
+/***********function downloadFile**************/
+
+
 afterEach(() => {
     jest.clearAllMocks();
 });
@@ -65,23 +78,60 @@ describe("Function \"report-generator\", generator", () => {
         }
     });
 
+    test('Cant create work folder', async () => {
+        fsPromiseMkDirSpy.mockRejectedValueOnce(new Error('Jest test error'));
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Jest test error');
+        }
+    });
+
+    test('Cant create outcome folder', async () => {
+        fsPromiseMkDirSpy
+            .mockResolvedValueOnce('ok')
+            .mockRejectedValueOnce(new Error('Jest test error'));
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Jest test error');
+        }
+    });
+
+    test('Cant save downloads file', async () => {
+        fsPromiseMkDirSpy.mockResolvedValue('ok');
+
+        setTimeout(() => {
+            mockWriteable.emit('error', new Error('Jest test error'));
+        }, 5);
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Не могу скачать файл Jest test error');
+        }
+    });
+
+    test('Cant  download file', async () => {
+        fsPromiseMkDirSpy.mockResolvedValue('ok');
+
+        axios.get.mockRejectedValueOnce(new Error('Jest test error'));
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Не могу скачать файл Jest test error');
+        }
+    });
+
     test('normal behavior', async () => {
         fsPromiseMkDirSpy.mockImplementation((path) => {
             return new Promise((resolve => {
                 resolve();
             }));
         });
-
-        /***********function downloadFile***************/
-        const mockWriteable = new PassThrough();
-        const mockReadable = new PassThrough();
-        const fakeReadStream = {
-            data: mockReadable
-        };
-        axios.get.mockResolvedValue(fakeReadStream);
-
-        fsCreateWriteStreamSpy.mockReturnValueOnce(mockWriteable);
-        /***********function downloadFile**************/
 
         fsPromiseReadFileSpy
             .mockResolvedValueOnce(testData.INPUT_FILE_NORMAL)
@@ -118,5 +168,7 @@ describe("Function \"report-generator\", generator", () => {
         expect(childProcessExecSpy.mock.calls[6][0]).toBe(`cd tmp/${userId}_reports/outcome;7z a -tzip ../\'5РА-16-1уп.zip\'`);
         expect(result).toBe(`tmp/${userId}_reports/5РА-16-1уп.zip`);
     });
+
+
 });
 //https://dev.to/cdanielsen/testing-streams-a-primer-3n6e

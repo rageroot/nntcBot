@@ -93,7 +93,7 @@ function downloadFile(filePathOnTelegramServer, folderOnLocal){
 
                 writer.on('error', err => {
                     writer.close();
-                    throw err;
+                    reject(new Error(`Не могу скачать файл ${err.message}`));
                 });
 
                 writer.on('finish', () => {
