@@ -126,6 +126,22 @@ describe("Function \"report-generator\", generator", () => {
         }
     });
 
+    test('Cant read download file', async () => {
+        fsPromiseMkDirSpy.mockResolvedValue('ok');
+
+        setTimeout(() => {
+            mockWriteable.emit('finish');
+        }, 50);
+
+        fsPromiseReadFileSpy.mockRejectedValueOnce(new Error('Jest test error'));
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Jest test error');
+        }
+    });
+
     test('normal behavior', async () => {
         fsPromiseMkDirSpy.mockImplementation((path) => {
             return new Promise((resolve => {
@@ -168,7 +184,5 @@ describe("Function \"report-generator\", generator", () => {
         expect(childProcessExecSpy.mock.calls[6][0]).toBe(`cd tmp/${userId}_reports/outcome;7z a -tzip ../\'5РА-16-1уп.zip\'`);
         expect(result).toBe(`tmp/${userId}_reports/5РА-16-1уп.zip`);
     });
-
-
 });
 //https://dev.to/cdanielsen/testing-streams-a-primer-3n6e
