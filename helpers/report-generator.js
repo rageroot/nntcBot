@@ -437,7 +437,7 @@ function validator(inputValues){
         const property = ['group', 'codeSpec', 'spec', 'cource',
             'hours', 'pm', 'begin', 'end', 'leader', 'leadPosition'];
 
-        if(!inputValues.pk.length || !inputValues.students.length || !inputValues.grades.length) {
+        if((!inputValues.pk.length || !inputValues.students.length || !inputValues.grades.length) || (inputValues.students.length !== inputValues.grades.length)) {
             reject(new Error('Не корректно заполнен шаблон'));
         }
 

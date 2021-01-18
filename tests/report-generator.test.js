@@ -142,6 +142,38 @@ describe("Function \"report-generator\", generator", () => {
         }
     });
 
+    test('Invalid input data. Not enough fields', async () => {
+        fsPromiseMkDirSpy.mockResolvedValue('ok');
+
+        setTimeout(() => {
+            mockWriteable.emit('finish');
+        }, 50);
+
+        fsPromiseReadFileSpy.mockResolvedValueOnce(testData.INPUT_FILE_NOT_FIELD);
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Не корректно заполнен шаблон');
+        }
+    });
+
+    test('Invalid input data. Not enough students', async () => {
+        fsPromiseMkDirSpy.mockResolvedValue('ok');
+
+        setTimeout(() => {
+            mockWriteable.emit('finish');
+        }, 50);
+
+        fsPromiseReadFileSpy.mockResolvedValueOnce(testData.INPUT_FILE_NOT_STUDENTS);
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Не корректно заполнен шаблон');
+        }
+    });
+
     test('normal behavior', async () => {
         fsPromiseMkDirSpy.mockImplementation((path) => {
             return new Promise((resolve => {
@@ -185,4 +217,3 @@ describe("Function \"report-generator\", generator", () => {
         expect(result).toBe(`tmp/${userId}_reports/5РА-16-1уп.zip`);
     });
 });
-//https://dev.to/cdanielsen/testing-streams-a-primer-3n6e
