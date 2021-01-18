@@ -36,10 +36,11 @@ module.exports.generate = function(userId, tfr){
             reportsTeacherTemplate: 'odt_templates/reportsGenerator/odtOtchRukTemplate'
         }
 
+        if(!tfr.file_path.endsWith('.txt')){
+            reject(new Error('Файл не правильного формата'));
+        }
+
         try{
-            if(!tfr.file_path.endsWith('.txt')){
-                reject(new Error('Файл не правильного формата'));
-            }
             await fsPromises.mkdir(paths.tmpFolderPath);
             await fsPromises.mkdir(paths.outcomeDir);
             const inputDataFile = await downloadFile(tfr.file_path, paths.tmpFolderPath);

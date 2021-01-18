@@ -57,6 +57,14 @@ describe("Function \"report-generator\", simple functions", () => {
 
 
 describe("Function \"report-generator\", generator", () => {
+    test('Incorrect input file type', async () => {
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test'});
+        }catch (err) {
+            expect(err.message).toBe('Файл не правильного формата');
+        }
+    });
+
     test('normal behavior', async () => {
         fsPromiseMkDirSpy.mockImplementation((path) => {
             return new Promise((resolve => {
