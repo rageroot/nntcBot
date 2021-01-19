@@ -361,7 +361,7 @@ function createTeachersReport(info, paths){
             await packer(`${paths.tmpFolderPath}/teacherReport`, `\'outcome/teacherReport.odt\'`);
 
         } catch (err) {
-            reject(new Error("Возникли проблемы с генерацией отчетов"));
+            reject(new Error("Возникли проблемы с генерацией отчетов " + err.message));
         }
     resolve();
     });

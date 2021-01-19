@@ -265,6 +265,59 @@ describe("Function \"report-generator\", generator", () => {
         }
     });
 
+    test('Cant copy teacher template', async () => {
+        fsPromiseMkDirSpy.mockResolvedValue('ok');
+
+        setTimeout(() => {
+            mockWriteable.emit('finish');
+        }, 50);
+
+        fsPromiseReadFileSpy
+            .mockResolvedValueOnce(testData.INPUT_FILE_NORMAL)
+            .mockResolvedValueOnce(testData.STUDENTS_CONTENT_XML);
+
+        fsPromiseWriteFileSpy.mockResolvedValue('done');
+
+        childProcessExecSpy.mockImplementation((command, cb) => {
+            if(command.endsWith('teacherReport')){
+                cb(new Error('Jest test error'));
+            }else {
+                cb(null);
+            }
+        });
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Возникли проблемы с генерацией отчетов Не могу скопировать файл шаблона');
+        }
+    });
+
+    test('Cant read teacher content xml file', async () => {
+        fsPromiseMkDirSpy.mockResolvedValue('ok');
+
+        setTimeout(() => {
+            mockWriteable.emit('finish');
+        }, 50);
+
+        fsPromiseReadFileSpy
+            .mockResolvedValueOnce(testData.INPUT_FILE_NORMAL)
+            .mockResolvedValueOnce(testData.STUDENTS_CONTENT_XML)
+            .mockRejectedValueOnce(new Error('Jest test error'));
+
+        fsPromiseWriteFileSpy.mockResolvedValue('done');
+
+        childProcessExecSpy.mockImplementation((command, cb) => {
+                cb(null);
+        });
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Возникли проблемы с генерацией отчетов Jest test error');
+        }
+    });
+
     test('normal behavior', async () => {
         fsPromiseMkDirSpy.mockImplementation((path) => {
             return new Promise((resolve => {
