@@ -174,6 +174,26 @@ describe("Function \"report-generator\", generator", () => {
         }
     });
 
+    test('Cant copy characteristics template', async () => {
+        fsPromiseMkDirSpy.mockResolvedValue('ok');
+
+        setTimeout(() => {
+            mockWriteable.emit('finish');
+        }, 50);
+
+        fsPromiseReadFileSpy.mockResolvedValueOnce(testData.INPUT_FILE_NORMAL);
+
+        childProcessExecSpy.mockImplementationOnce((command, cb) => {
+            cb(new Error('Jest test error'));
+        });
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Возникли проблемы с генерацией отчетов Не могу скопировать файл шаблона');
+        }
+    });
+
     test('normal behavior', async () => {
         fsPromiseMkDirSpy.mockImplementation((path) => {
             return new Promise((resolve => {
