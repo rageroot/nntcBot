@@ -318,6 +318,68 @@ describe("Function \"report-generator\", generator", () => {
         }
     });
 
+    test('Cant write teacher content xml file', async () => {
+        fsPromiseMkDirSpy.mockResolvedValue('ok');
+
+        setTimeout(() => {
+            mockWriteable.emit('finish');
+        }, 50);
+
+        fsPromiseReadFileSpy
+            .mockResolvedValueOnce(testData.INPUT_FILE_NORMAL)
+            .mockResolvedValueOnce(testData.STUDENTS_CONTENT_XML)
+            .mockResolvedValueOnce(testData.TEACHERS_CORRECT_OUTPUT);
+
+        fsPromiseWriteFileSpy.mockImplementation((path, data) => {
+            return new Promise((resolve, reject) => {
+                if(path.endsWith('/teacherReport/content.xml')){
+                    reject(new Error('Jest test error'));
+                }else{
+                    resolve();
+                }
+            });
+        });
+
+        childProcessExecSpy.mockImplementation((command, cb) => {
+            cb(null);
+        });
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Возникли проблемы с генерацией отчетов Jest test error');
+        }
+    });
+
+    test('Cant zip teacher report', async () => {
+        fsPromiseMkDirSpy.mockResolvedValue('ok');
+
+        setTimeout(() => {
+            mockWriteable.emit('finish');
+        }, 50);
+
+        fsPromiseReadFileSpy
+            .mockResolvedValueOnce(testData.INPUT_FILE_NORMAL)
+            .mockResolvedValueOnce(testData.STUDENTS_CONTENT_XML)
+            .mockResolvedValueOnce(testData.TEACHERS_CORRECT_OUTPUT);
+
+        fsPromiseWriteFileSpy.mockResolvedValue('done');
+
+        childProcessExecSpy.mockImplementation((command, cb) => {
+            if(command.includes('teacherReport.odt')){
+                cb(new Error('Jest test error'));
+            }else {
+                cb(null);
+            }
+        });
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Возникли проблемы с генерацией отчетов Не могу запаковать в odt');
+        }
+    });
+
     test('normal behavior', async () => {
         fsPromiseMkDirSpy.mockImplementation((path) => {
             return new Promise((resolve => {
