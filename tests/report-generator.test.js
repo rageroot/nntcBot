@@ -194,6 +194,77 @@ describe("Function \"report-generator\", generator", () => {
         }
     });
 
+    test('Cant read characteristics xml file', async () => {
+        fsPromiseMkDirSpy.mockResolvedValue('ok');
+
+        setTimeout(() => {
+            mockWriteable.emit('finish');
+        }, 50);
+
+        fsPromiseReadFileSpy.mockResolvedValueOnce(testData.INPUT_FILE_NORMAL)
+            .mockRejectedValueOnce(new Error('Jest test error'));
+
+        childProcessExecSpy.mockImplementationOnce((command, cb) => {
+            cb(null);
+        });
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Возникли проблемы с генерацией отчетов Jest test error');
+        }
+    });
+
+    test('Cant write characteristics xml file', async () => {
+        fsPromiseMkDirSpy.mockResolvedValue('ok');
+
+        setTimeout(() => {
+            mockWriteable.emit('finish');
+        }, 50);
+
+        fsPromiseReadFileSpy
+            .mockResolvedValueOnce(testData.INPUT_FILE_NORMAL)
+            .mockResolvedValueOnce(testData.STUDENTS_CONTENT_XML);
+
+        fsPromiseWriteFileSpy.mockRejectedValueOnce(new Error('Jest test error'));
+
+        childProcessExecSpy.mockImplementationOnce((command, cb) => {
+            cb(null);
+        });
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Возникли проблемы с генерацией отчетов Jest test error');
+        }
+    });
+
+    test('Cant zip characteristics', async () => {
+        fsPromiseMkDirSpy.mockResolvedValue('ok');
+
+        setTimeout(() => {
+            mockWriteable.emit('finish');
+        }, 50);
+
+        fsPromiseReadFileSpy
+            .mockResolvedValueOnce(testData.INPUT_FILE_NORMAL)
+            .mockResolvedValueOnce(testData.STUDENTS_CONTENT_XML);
+
+        fsPromiseWriteFileSpy.mockResolvedValue('done');
+
+        childProcessExecSpy.mockImplementationOnce((command, cb) => {
+            cb(null);
+        }).mockImplementationOnce((command, cb) => {
+            cb(new Error('Jest test error'));
+        });
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Возникли проблемы с генерацией отчетов Не могу запаковать в odt');
+        }
+    });
+
     test('normal behavior', async () => {
         fsPromiseMkDirSpy.mockImplementation((path) => {
             return new Promise((resolve => {
