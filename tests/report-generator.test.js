@@ -380,6 +380,35 @@ describe("Function \"report-generator\", generator", () => {
         }
     });
 
+    test('Cant final zip', async () => {
+        fsPromiseMkDirSpy.mockResolvedValue('ok');
+
+        setTimeout(() => {
+            mockWriteable.emit('finish');
+        }, 50);
+
+        fsPromiseReadFileSpy
+            .mockResolvedValueOnce(testData.INPUT_FILE_NORMAL)
+            .mockResolvedValueOnce(testData.STUDENTS_CONTENT_XML)
+            .mockResolvedValueOnce(testData.TEACHERS_CORRECT_OUTPUT);
+
+        fsPromiseWriteFileSpy.mockResolvedValue('done');
+
+        childProcessExecSpy.mockImplementation((command, cb) => {
+            if(command.includes('7z a -tzip')){
+                cb(new Error('Jest test error'));
+            }else {
+                cb(null);
+            }
+        });
+
+        try {
+            await reportGenerator.generate(userId, {file_path: 'test.txt'});
+        }catch (err) {
+            expect(err.message).toBe('Не могу запаковать в zip');
+        }
+    });
+
     test('normal behavior', async () => {
         fsPromiseMkDirSpy.mockImplementation((path) => {
             return new Promise((resolve => {
