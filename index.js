@@ -36,16 +36,13 @@ const intention = {
     addTemplateToGenerateReport: {}
 };
 
-let userId;
-let userName;
-
 // ######## Middleware ###########
 /**
  * установка значений id и имени пользователя
  */
 bot.use(async (ctx, next) => {
-    userId = ctx.from.id.toString();
-    userName = ctx.from.first_name;
+    ctx.userId = ctx.from.id.toString()
+    ctx.userName = ctx.from.first_name
     await next();
 });
 
@@ -54,9 +51,9 @@ bot.use(async (ctx, next) => {
  * Отключил на кое какое время ;-)
  */
 /*bot.use(async (ctx, next) => {
-    strings.textConstants.ACCESS_DENIED_MESSAGE = userName + ', Вам доступ запрещён. Сообщите ваш ID для добавления полномочий: ' + userId;
+    strings.textConstants.ACCESS_DENIED_MESSAGE = ctx.userName + ', Вам доступ запрещён. Сообщите ваш ID для добавления полномочий: ' + ctx.userId;
 
-    if (cfg.VALID_USERS.indexOf(userId) === -1) {
+    if (cfg.VALID_USERS.indexOf(ctx.userId) === -1) {
         await ctx.reply(strings.textConstants.ACCESS_DENIED_MESSAGE);
     }
     else {
@@ -68,9 +65,9 @@ bot.use(async (ctx, next) => {
  * Каждый раз проверка, что пользователь есть в базе данных
  */
 bot.use(async (ctx,next) => {
-    const user = await userModel.get(userId);
+    const user = await userModel.get(ctx.userId);
     if(!user){
-        await userModel.newUser(userId);
+        await userModel.newUser(ctx.userId);
     }
     await next();
 });
@@ -124,7 +121,7 @@ bot.use(async (ctx, next) => {
  */
 async function hello(ctx){
     const WELCOME_MESSAGE = [
-        'Добро пожаловать, ' + userName,
+        'Добро пожаловать, ' + ctx.userName,
         'Чтобы быстро добавить дело введи:',
         'Д: %whatYourDo%',
         'Чтобы включить или выключить отображение дат в листе самооценки: /showDate',
@@ -207,7 +204,7 @@ bot.hears(strings.keyboardConstants.BELLS, async (ctx) => {
  * Команда на статус Jitsi
  */
 bot.hears(strings.keyboardConstants.JITSY, async (ctx) => {
-    await ctx.reply(userName + ', ' + await jitsi.health());
+    await ctx.reply(ctx.userName + ', ' + await jitsi.health());
 });
 
 /**
@@ -228,8 +225,8 @@ bot.command('open_m', async (ctx) => {
  */
 bot.command('showDate', async (ctx) => {
     try {
-        const show = await userModel.get(userId);
-        const queryRes = await userModel.dateDisplay(userId, !show.showDate);
+        const show = await userModel.get(ctx.userId);
+        const queryRes = await userModel.dateDisplay(ctx.userId, !show.showDate);
         if(queryRes) {
             await ctx.reply(`Вывод дат в листах самооценки ${(!show.showDate) ? 'включен' : 'выключен'}`);
         }else{
@@ -260,19 +257,19 @@ bot.hears(strings.keyboardConstants.REPORTS, async (ctx) => {
 bot.on('document', async (ctx) => {
     // await ctx.reply(ctx.message.document.file_id);
     try {
-         if (userId in intention.addTemplateToGenerateReport) {
-            delete intention.addTemplateToGenerateReport[userId];
+         if (ctx.userId in intention.addTemplateToGenerateReport) {
+            delete intention.addTemplateToGenerateReport[ctx.userId];
             const fileId = ctx.message.document.file_id;
             //не хотел подключать API телеграмма к хэлперам, по этому подготавливаю
             //файл к загрузке в роутере
             const telegramFileResponse = await ctx.telegram.getFile(fileId);
-            const pathToArchiveWithReports = await report.generate(userId, telegramFileResponse);
+            const pathToArchiveWithReports = await report.generate(ctx.userId, telegramFileResponse);
             await ctx.replyWithDocument({source: pathToArchiveWithReports});
          }
     }catch (err) {
         await ctx.reply(err.message);
     }finally {
-        await report.garbageCollector(userId);
+        await report.garbageCollector(ctx.userId);
     }
 });
 
@@ -284,15 +281,15 @@ bot.on('document', async (ctx) => {
  */
 bot.on('text', async (ctx) => {
     try {
-        if (userId in intention.addCase) {     //Если бот предложил пользователю ввести дело, то в объекте будет свойство == id
-            delete intention.addCase[userId];
-            await ctx.reply(await myself.new(userId, userName, ctx.message.text.trim()));
+        if (ctx.userId in intention.addCase) {     //Если бот предложил пользователю ввести дело, то в объекте будет свойство == id
+            delete intention.addCase[ctx.userId];
+            await ctx.reply(await myself.new(ctx.userId, ctx.userName, ctx.message.text.trim()));
         } else {
             if (ctx.message.text.startsWith(strings.commands.MYSELF_QUICK_NEW)) {
-                await ctx.reply(await myself.new(userId, userName, ctx.message.text.slice(2).trim()));
+                await ctx.reply(await myself.new(ctx.userId, ctx.userName, ctx.message.text.slice(2).trim()));
             } else {
                 if (ctx.message.text === strings.textConstants.CONFIRM_DELETE) {
-                    await ctx.reply(await myself.clear(userId));
+                    await ctx.reply(await myself.clear(ctx.userId));
                 } else {
                     await hello(ctx);
                 }
@@ -330,7 +327,7 @@ async function reportMenuCallback(ctx, callbackQuery){
                 await ctx.replyWithDocument({source: report.template()});
                 break;
             case strings.commands.REPORTS_GENERATE:
-                intention.addTemplateToGenerateReport[userId] = false;
+                intention.addTemplateToGenerateReport[ctx.userId] = false;
                 await ctx.reply("Дай мне заполненный шаблон, дружочек");
                 break;
         }
@@ -349,17 +346,17 @@ async function mySelfMenuCallback(ctx, callbackQuery){
     try {
         switch (callbackQuery) {
             case strings.commands.MYSELF_LIST:
-                await ctx.reply(await myself.list(userId, userName));
+                await ctx.reply(await myself.list(ctx.userId, ctx.userName));
                 break;
             case strings.commands.MYSELF_NEW:
-                intention.addCase[userId] = false;
+                intention.addCase[ctx.userId] = false;
                 await ctx.reply("Что ты сделал, дружочек?");
                 break;
             case strings.commands.MYSELF_CLEAR:
                 await ctx.reply(strings.textConstants.DELETE);
                 break;
             case strings.commands.MYSELF_GET_FILE:
-                await replyMyselfFile(userId, ctx);
+                await replyMyselfFile(ctx.userId, ctx);
                 break;
         }
     }catch (err) {
