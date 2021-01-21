@@ -73,3 +73,23 @@ module.exports.health = () => {
 	],
 ]
 */
+/*
+* #!/bin/bash
+
+# set -x
+# exec &> >(tee -a "/tmp/jitsi-status-log.txt")
+
+JITSI_DIR="/srv/nntc/jitsi/"
+
+MUC_DOMAIN="muc.meet.jitsi"
+STATUS_URL="http://127.0.0.1:5280/status?domain=${MUC_DOMAIN}"
+
+main() {
+    cd "$JITSI_DIR"
+    docker-compose exec prosody wget --quiet -O- "$STATUS_URL"
+}
+
+
+main $*
+
+* */
