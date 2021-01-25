@@ -72,14 +72,42 @@ bot.use(async (ctx,next) => {
             {
                 userId: ctx.userId,
                 username: ctx.from.username,
-                firstName: ctx.from.first_name,
-                lastName: ctx.from.last_name
+                firstname: ctx.from.first_name,
+                lastname: ctx.from.last_name
             });
         ctx.status = "student";
     }else{
         ctx.status = user.status;
+
+        if(user.username === "null"){
+            await userModel.setUserInfo(
+                {
+                    userId: ctx.userId,
+                    username: ctx.from.username,
+                    firstname: ctx.from.first_name,
+                    lastname: ctx.from.last_name
+                });
+        }
     }
-    console.log(ctx.status);
+
+/*    switch (ctx.updateType){
+        case "message":
+            if(ctx.updateSubTypes[0] === 'document'){
+                console.log("message Загрузил документ");
+            }else{
+                console.log("message " + ctx.message.text);
+            }
+            break;
+        case "callback_query":
+            console.log("callback_query: ", ctx.update.callback_query.data);
+            break;
+        default: break;
+    }
+
+    console.log("Middleware says: " + user.firstname);
+    console.log("Middleware says: " + user.lastname);
+    console.log("Middleware says: " + user.username);
+    console.log("Middleware says: " + ctx.status);*/
     await next();
 });
 

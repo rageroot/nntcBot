@@ -4,7 +4,9 @@ const usersSchema = mongoose.Schema({
     userId: {type: Number, min: 1},
     showDate: {type: Boolean, default: false},
     status: {type: String, default: "student"},
-    username: {type: String, default: "null"}
+    username: {type: String, default: "null"},
+    firstname: {type: String, default: "null"},
+    lastname: {type: String, default: "null"}
 });
 
 const Users = mongoose.model('user', usersSchema);
@@ -46,8 +48,8 @@ module.exports.newUser = async (params) => {
         {
             userId: params.userId,
             username: params.username,
-            firstName: params.first_name,
-            lastName: params.last_name
+            firstname: params.firstname,
+            lastname: params.lastname
         }
     );
 
@@ -55,6 +57,20 @@ module.exports.newUser = async (params) => {
         await user.save();
     } catch (err) {
         throw new Error('Ошибка при сохранении в базу данных');
+    }
+}
+
+module.exports.setUserInfo = async (params) => {
+    try {
+        const result = await Users.updateOne({userId: params.userId},
+            {
+                username: params.username,
+                firstname: params.firstname,
+                lastname: params.lastname
+            });
+        return result.nModified;
+    } catch (err) {
+        throw new Error("Не могу изменить данные в базе");
     }
 }
 
