@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 
 const usersSchema = mongoose.Schema({
     userId: {type: Number, min: 1},
-    showDate: {type: Boolean, default: false}
+    showDate: {type: Boolean, default: false},
+    status: {type: String, default: "student"},
+    username: {type: String, default: "null"}
 });
 
 const Users = mongoose.model('user', usersSchema);
@@ -36,13 +38,16 @@ module.exports.dateDisplay = async (userId, show) => {
 
 /**
  * Добавить нового пользователя в базу
- * @param userId
+ * @param {userId, username, firstName, lastName}
  * @returns {Promise<void>}
  */
-module.exports.newUser = async (userId) => {
+module.exports.newUser = async (params) => {
     const user = new Users(
         {
-            userId: userId,
+            userId: params.userId,
+            username: params.username,
+            firstName: params.first_name,
+            lastName: params.last_name
         }
     );
 

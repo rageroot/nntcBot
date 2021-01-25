@@ -38,7 +38,7 @@ const intention = {
 
 // ######## Middleware ###########
 /**
- * установка значений id и имени пользователя
+ * установка значений id, имени пользователя
  */
 bot.use(async (ctx, next) => {
     ctx.userId = ctx.from.id.toString()
@@ -62,13 +62,24 @@ bot.use(async (ctx, next) => {
 });*/
 
 /**
- * Каждый раз проверка, что пользователь есть в базе данных
+ * Каждый раз проверка, что пользователь есть в базе данных и устанавливаю статус.
+ * Докидывает пользователя в базу, если его нет.
  */
 bot.use(async (ctx,next) => {
     const user = await userModel.get(ctx.userId);
     if(!user){
-        await userModel.newUser(ctx.userId);
+        await userModel.newUser(
+            {
+                userId: ctx.userId,
+                username: ctx.from.username,
+                firstName: ctx.from.first_name,
+                lastName: ctx.from.last_name
+            });
+        ctx.status = "student";
+    }else{
+        ctx.status = user.status;
     }
+    console.log(ctx.status);
     await next();
 });
 
