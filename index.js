@@ -13,6 +13,7 @@ const myself = require('./helpers/myself');
 const report = require('./helpers/report-generator');
 const bd = require('./models/botBd');
 const userModel = require('./models/users');
+const logs = require('./models/logs');
 
 // const easterEggs = require('./helpers/easterEggs');
 // const kursGen = require('./helpers/wizard-kurs-report-generator');
@@ -90,20 +91,27 @@ bot.use(async (ctx,next) => {
         }
     }
 
-/*    switch (ctx.updateType){
+    const recordForLog = {
+        userId: ctx.userId,
+        username: ctx.from.username,
+    };
+    switch (ctx.updateType){
         case "message":
             if(ctx.updateSubTypes[0] === 'document'){
-                console.log("message Загрузил документ");
+                recordForLog.messageType = 'document';
+                recordForLog.message = 'document';
             }else{
-                console.log("message " + ctx.message.text);
+                recordForLog.messageType = 'message';
+                recordForLog.message = ctx.message.text;
             }
             break;
         case "callback_query":
-            console.log("callback_query: ", ctx.update.callback_query.data);
+            recordForLog.messageType = 'callback_query';
+            recordForLog.message = ctx.update.callback_query.data;
             break;
         default: break;
     }
-
+/*
     console.log("Middleware says: " + user.firstname);
     console.log("Middleware says: " + user.lastname);
     console.log("Middleware says: " + user.username);

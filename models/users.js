@@ -74,7 +74,6 @@ module.exports.setUserInfo = async (params) => {
     }
 }
 
-
 /**
  * требуется чтобы один раз заполнить базу
  * @param userId
