@@ -79,6 +79,7 @@ bot.use(async (ctx,next) => {
         ctx.status = "student";
     }else{
         ctx.status = user.status;
+        ctx.note = user.note;
 
         if(user.username === "null"){
             await userModel.setUserInfo(
@@ -90,10 +91,18 @@ bot.use(async (ctx,next) => {
                 });
         }
     }
+    await next();
+});
 
+/**
+ * Логирование запросов
+ */
+bot.use(async (ctx, next) => {
     const recordForLog = {
         userId: ctx.userId,
         username: ctx.from.username,
+        realname: ctx.from.first_name + " " + ctx.from.last_name,
+        note: ctx.note,
     };
     switch (ctx.updateType){
         case "message":
@@ -111,14 +120,9 @@ bot.use(async (ctx,next) => {
             break;
         default: break;
     }
-/*
-    console.log("Middleware says: " + user.firstname);
-    console.log("Middleware says: " + user.lastname);
-    console.log("Middleware says: " + user.username);
-    console.log("Middleware says: " + ctx.status);*/
+    await logs.addLog(recordForLog);
     await next();
 });
-
 
 /**
  * скорость выполнения запросов. По умолчанию не используется

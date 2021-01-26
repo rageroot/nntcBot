@@ -6,7 +6,9 @@ const usersSchema = mongoose.Schema({
     status: {type: String, default: "student"},
     username: {type: String, default: "null"},
     firstname: {type: String, default: "null"},
-    lastname: {type: String, default: "null"}
+    lastname: {type: String, default: "null"},
+    note: {type: String, default: ""},
+    opener: {type: Boolean, default: false}
 });
 
 const Users = mongoose.model('user', usersSchema);

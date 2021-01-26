@@ -1,23 +1,23 @@
 const mongoose = require('mongoose');
 
+/**
+ *
+ * messageType- message, docement or callback_query
+ */
 const logsSchema = mongoose.Schema({
     userId: {type: Number, min: 1},
     username: {type: String},
-    time: {type: Date, default: Date.now()},
+    realname: {type: String},
+    time: {type: Number, default: new Date()},
     messageType: {type: String},
-    message: {type: String}
+    message: {type: String},
+    note: {type: String, default: ""},
 });
 
 const Logs = mongoose.model('log', logsSchema);
 
 module.exports.addLog = async (param) => {
-/*    const record = new Logs({
-        userId: param.userId,
-        username: param.username,
-        messageType: param.messageType,
-        message: param.message,
-    });*/
-    const record = new Logs(...param)
+    const record = new Logs(param)
 
     try{
         await record.save();
