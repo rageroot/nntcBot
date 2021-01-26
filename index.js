@@ -174,29 +174,10 @@ bot.use(async (ctx, next) => {
  * @returns {Promise<void>}
  */
 async function hello(ctx){
-    const WELCOME_MESSAGE = [
-        'Добро пожаловать, ' + ctx.userName,
-        'Чтобы быстро добавить дело введи:',
-        'Д: %whatYourDo%',
-        'Чтобы включить или выключить отображение дат в листе самооценки: /showDate',
-        'Или выбери действие:',
-    ].join('\n');
+    const WELCOME_MESSAGE =
+        'Добро пожаловать, ' + ctx.userName + '\n' + strings.welcomeMessage.forStudents;
 
-    await ctx.reply(WELCOME_MESSAGE, {
-        "reply_markup": {
-            "keyboard": [
-                            [
-                                strings.keyboardConstants.BELLS,
-                                strings.keyboardConstants.JITSY
-                            ],
-                            [
-                                strings.keyboardConstants.VC,
-                                strings.keyboardConstants.MYSELF,
-                                strings.keyboardConstants.REPORTS
-                            ]
-                        ]
-        }
-    });
+    await ctx.reply(WELCOME_MESSAGE, strings.mainKeyboard.forStudents);
 }
 
 /**

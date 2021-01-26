@@ -33,6 +33,46 @@ module.exports.commands = {
     REPORTS_GENERATE: "reportsGenerate"
 }
 
+module.exports.welcomeMessage = {
+    forStudents: 'Ты можешь смотреть расписание звонков \nи открывать дверь ВЦ, если тебе лично разрешит\nодин' +
+        ' из админов.\nСписок админов можно получить по команде /admins\n' +
+        ' чтобы повысить уровень привилегий- проси админа',
+    forTeachers: "",
+    forAdmins: "'Чтобы быстро добавить дело введи:',\n" +
+        "        'Д: %whatYourDo%',\n" +
+        "        'Чтобы включить или выключить отображение дат в листе самооценки: /showDate',\n" +
+        "        'Или выбери действие:",
+}
+
+module.exports.mainKeyboard = {
+    forStudents: {
+        "reply_markup": {
+            "keyboard": [
+                [
+                    keyboardConstants.BELLS,
+                    keyboardConstants.VC,
+                ]
+            ]
+        }
+    },
+    forAdmins: {
+        "reply_markup": {
+            "keyboard": [
+                [
+                    keyboardConstants.BELLS,
+                    keyboardConstants.JITSY
+                ],
+                [
+                    keyboardConstants.VC,
+                    keyboardConstants.MYSELF,
+                    keyboardConstants.REPORTS
+                ]
+            ]
+        }
+    }
+}
+
+
 module.exports.listsOfRights = {
     students: [keyboardConstants.BELLS, keyboardConstants.VC, '/start', '/help'],
     teachers: [],
