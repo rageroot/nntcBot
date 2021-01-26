@@ -14,6 +14,7 @@ const report = require('./helpers/report-generator');
 const bd = require('./models/botBd');
 const userModel = require('./models/users');
 const logs = require('./models/logs');
+const rights = require('./helpers/cowSuperPowers');
 
 // const easterEggs = require('./helpers/easterEggs');
 // const kursGen = require('./helpers/wizard-kurs-report-generator');
@@ -48,22 +49,8 @@ bot.use(async (ctx, next) => {
 });
 
 /**
- * отсекаю невалидных пользователей
- * Отключил на кое какое время ;-)
- */
-/*bot.use(async (ctx, next) => {
-    strings.textConstants.ACCESS_DENIED_MESSAGE = ctx.userName + ', Вам доступ запрещён. Сообщите ваш ID для добавления полномочий: ' + ctx.userId;
-
-    if (cfg.VALID_USERS.indexOf(ctx.userId) === -1) {
-        await ctx.reply(strings.textConstants.ACCESS_DENIED_MESSAGE);
-    }
-    else {
-        await next();
-    }
-});*/
-
-/**
- * Каждый раз проверка, что пользователь есть в базе данных и устанавливаю статус.
+ * Каждый раз проверка, что пользователь есть в базе данных
+ * и устанавливает в обхект ctx дополнительные сведения о пользователе.
  * Докидывает пользователя в базу, если его нет.
  */
 bot.use(async (ctx,next) => {
@@ -77,9 +64,11 @@ bot.use(async (ctx,next) => {
                 lastname: ctx.from.last_name
             });
         ctx.status = "student";
+        ctx.opener = "false";
     }else{
         ctx.status = user.status;
         ctx.note = user.note;
+        ctx.opener = (user.status === 'student') ? user.opener : true;
 
         if(user.username === "null"){
             await userModel.setUserInfo(
@@ -120,8 +109,22 @@ bot.use(async (ctx, next) => {
             break;
         default: break;
     }
+    ctx.messageType = recordForLog.messageType;
+    ctx.request = recordForLog.message;
     await logs.addLog(recordForLog);
     await next();
+});
+
+/**
+ * отсекаю пользователям действия, на которые у них нет прав
+ */
+bot.use(async (ctx, next) => {
+    if(await rights.hasAccess(ctx.status, ctx.messageType, ctx.request, ctx.opener)){
+        await next();
+    }else{
+        await ctx.reply("Нет доступа");
+    }
+
 });
 
 /**

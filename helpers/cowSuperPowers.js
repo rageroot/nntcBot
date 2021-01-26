@@ -9,4 +9,25 @@
 * изменять права (в целях безопасности, админ не может сотворить другого админа. Другого админа
 * можно сотворить только вручную в базе), может давать избранным студентам доступ к открывашке двери
 * */
+const strings = require('../resources/strings');
 
+
+module.exports.hasAccess = (status, requestType, request, opener = true) => {
+    switch (status) {
+        case "student":
+            if((requestType === "message") && strings.listsOfRights.students.includes(request)){
+                if(request === strings.keyboardConstants.VC){
+                    return opener;
+                }
+                return true;
+            }else{
+                return false;
+            }
+        case "teacher":
+            break;
+        case "admin":
+            break;
+        default:
+            return false;
+    }
+}

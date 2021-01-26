@@ -7,7 +7,7 @@ module.exports.textConstants = {
     REPORTS_GENERATE_TEMPLATE_TXT: "odt_templates/reportsGenerator/reportTemplate.txt",
 };
 
-module.exports.keyboardConstants = {
+const keyboardConstants = {
     BELLS: "Расписание звонков",
     JITSY: "Статус онлайн конференций",
     VC: "Открыть ВЦ",
@@ -32,3 +32,10 @@ module.exports.commands = {
     REPORTS_TEMPLATE: "reportsTemplate",
     REPORTS_GENERATE: "reportsGenerate"
 }
+
+module.exports.listsOfRights = {
+    students: [keyboardConstants.BELLS, keyboardConstants.VC, '/start', '/help'],
+    teachers: [],
+}
+
+module.exports.keyboardConstants = keyboardConstants;
