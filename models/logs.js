@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 /**
  *
- * messageType- message, docement or callback_query
+ * messageType- message, document or callback_query
  */
 const logsSchema = mongoose.Schema({
     userId: {type: Number, min: 1},
