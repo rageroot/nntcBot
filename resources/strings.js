@@ -36,7 +36,7 @@ module.exports.commands = {
 module.exports.welcomeMessage = {
     forStudents: 'Ты можешь смотреть расписание звонков \nи открывать дверь ВЦ, если тебе лично разрешит\nодин' +
         ' из админов.\nСписок админов можно получить по команде /admins\n' +
-        ' чтобы повысить уровень привилегий- проси админа',
+        ' чтобы повысить уровень привилегий- проси админа\nПолучить свой id /getId',
     forTeachers: "",
     forAdmins: "'Чтобы быстро добавить дело введи:',\n" +
         "        'Д: %whatYourDo%',\n" +
@@ -74,7 +74,7 @@ module.exports.mainKeyboard = {
 
 
 module.exports.listsOfRights = {
-    students: [keyboardConstants.BELLS, keyboardConstants.VC, '/start', '/help'],
+    students: [keyboardConstants.BELLS, keyboardConstants.VC, '/start', '/help', '/admins', '/getId'],
     teachers: [],
 }
 

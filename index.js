@@ -217,9 +217,19 @@ bot.help( async (ctx) => {
     await hello(ctx);
 });
 
-//bot.command('voice', async (ctx) => {
-//    ctx.reply(await action(ctx.from.id.toString(), ctx.from.first_name, 'voice'));
-//});
+/**
+ * Выводит telegramId пользователя
+ */
+bot.command('getId', async (ctx) => {
+    await ctx.reply(ctx.userId);
+});
+
+/**
+ * Выводит список всех админов
+ */
+bot.command('admins', async (ctx) => {
+    await ctx.reply(await rights.getAdmins());
+});
 
 /**
  * Команда на открытие двери ВЦ
@@ -244,10 +254,9 @@ bot.hears(strings.keyboardConstants.JITSY, async (ctx) => {
 
 /**
  * заглушка на команду на открытие мастерских
- */
 bot.command('open_m', async (ctx) => {
     await ctx.reply(await otkrivator.openMasterskie());
-});
+});*/
 
 //Когда то код был нужен для рефакторинга хранимых данных. Возможно, еще понадобиться
 //

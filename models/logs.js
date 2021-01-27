@@ -18,7 +18,6 @@ const Logs = mongoose.model('log', logsSchema);
 
 module.exports.addLog = async (param) => {
     const record = new Logs(param)
-
     try{
         await record.save();
     }catch (err) {

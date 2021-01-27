@@ -76,6 +76,17 @@ module.exports.setUserInfo = async (params) => {
     }
 }
 
+module.exports.getAllAdmin = async () => {
+    const admins = await Users.find({status: "admin"},
+    {
+        username: 1,
+        _id: 0,
+        firstname: 1,
+        lastname: 1
+    });
+    return admins;
+}
+
 /**
  * требуется чтобы один раз заполнить базу
  * @param userId

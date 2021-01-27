@@ -10,7 +10,7 @@
 * можно сотворить только вручную в базе), может давать избранным студентам доступ к открывашке двери
 * */
 const strings = require('../resources/strings');
-
+const users = require('../models/users');
 
 module.exports.hasAccess = (status, requestType, request, opener = true) => {
     switch (status) {
@@ -30,4 +30,17 @@ module.exports.hasAccess = (status, requestType, request, opener = true) => {
         default:
             return false;
     }
+}
+
+/**
+ * Получает из базы всех админов и выводит красивый список
+ * @returns {Promise<string>}
+ */
+module.exports.getAdmins = async () => {
+    const adminsResponse = await users.getAllAdmin();
+    const admins = [];
+    for(const user of adminsResponse){
+        admins.push('@' + user.username + ' ' + user.firstname + ' ' + user.lastname);
+    }
+    return 'Список админов:\n' + admins.join('\n');
 }
