@@ -26,7 +26,7 @@ module.exports.hasAccess = (status, requestType, request, opener = true) => {
         case "teacher":
             break;
         case "admin":
-            break;
+            return true;
         default:
             return false;
     }

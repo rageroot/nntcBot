@@ -174,10 +174,20 @@ bot.use(async (ctx, next) => {
  * @returns {Promise<void>}
  */
 async function hello(ctx){
-    const WELCOME_MESSAGE =
-        'Добро пожаловать, ' + ctx.userName + '\n' + strings.welcomeMessage.forStudents;
+    let welcomeMessage;
+    let mainKeyboard;
 
-    await ctx.reply(WELCOME_MESSAGE, strings.mainKeyboard.forStudents);
+    switch (ctx.status) {
+        case 'student':
+            welcomeMessage = 'Добро пожаловать, ' + ctx.userName + '\n' + strings.welcomeMessage.forStudents;
+            mainKeyboard = strings.mainKeyboard.forStudents;
+            break;
+        case 'admin':
+            welcomeMessage = 'Добро пожаловать, ' + ctx.userName + '\n' + strings.welcomeMessage.forAdmins;
+            mainKeyboard = strings.mainKeyboard.forAdmins;
+    }
+
+    await ctx.reply(welcomeMessage, mainKeyboard);
 }
 
 /**
