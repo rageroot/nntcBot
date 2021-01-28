@@ -11,7 +11,8 @@ const keyboardConstants = {
     BELLS: "Расписание звонков",
     JITSY: "Статус онлайн конференций",
     VC: "Открыть ВЦ",
-    MYSELF: "Листы самооценки",
+    MYSELF: "Самооценка",
+    RIGHTS: "Управление пользователями",
     MYSELF_LIST: "Список выполненных дел",
     MYSELF_NEW: "Добавить новое дело",
     MYSELF_CLEAR: "Очистить список дел",
@@ -62,11 +63,12 @@ module.exports.mainKeyboard = {
         "reply_markup": {
             "keyboard": [
                 [
+                    keyboardConstants.VC,
                     keyboardConstants.BELLS,
                     keyboardConstants.JITSY
                 ],
                 [
-                    keyboardConstants.VC,
+                    keyboardConstants.RIGHTS,
                     keyboardConstants.MYSELF,
                     keyboardConstants.REPORTS
                 ]

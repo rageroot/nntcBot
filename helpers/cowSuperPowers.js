@@ -44,3 +44,25 @@ module.exports.getAdmins = async () => {
     }
     return 'Список админов:\n' + admins.join('\n');
 }
+
+module.exports.getUserInfo = async (userId) => {
+    const message = [];
+    try {
+        const userInfo = await users.get(userId);
+        if(userInfo){
+            message.push([`Выбран пользователь с id: ${userInfo.userId}`],
+                [`Имя: ${userInfo.firstname} ${userInfo.lastname}`],
+                [`username: ${userInfo.username}`],
+                [`Открывать дверь ВЦ: ${(userInfo.opener)? "МОЖЕТ": "НЕ МОЖЕТ"}`],
+                [`Заметки: ${userInfo.note}`]);
+            return message.join('\n');
+        }
+        else{
+            return `Пользователя ${userId} нет, дружочек, попробуй другой разочек`;
+        }
+    }catch (err)
+    {
+        return "Какие то проблемы с базой, дружочек, попробуй еще разочек";
+    }
+
+}

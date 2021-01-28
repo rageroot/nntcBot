@@ -23,7 +23,8 @@ const rights = require('./helpers/cowSuperPowers');
 const bot = new Telegraf(cfg.TG_TOKEN);
 bd.connect();
 /**
- * intention- буфер намерений пользователя выполнить ввод данных следующим действием
+ * intention- буфер намерений пользователя выполнить ввод данных следующим действием.
+ * Хранит информацию о пользователе, изменения в которого хочет вносить админ
  * Защита от сучайного срабатывания
  *
  * addCase - буфер, помогающий определить цель следующего сообщения- обработать как текст или записать в список дел
@@ -31,11 +32,15 @@ bd.connect();
  * middlewares пометит свойство объекта == id пользователя на удаление и удалит при следующем вводе.
  *
  * addTemplateToGenerateReport - намерение загрузить заполненный шаблон для генерации отчетов по практике. Тот же принцип
+ *
+ * rights - объект, хранящий свойства вида
+ *          idАдминистратора: idПользователя, с которым админ ведет работу
  * @type {{}}
  */
 const intention = {
     addCase: {},
-    addTemplateToGenerateReport: {}
+    addTemplateToGenerateReport: {},
+    rights: {}
 };
 
 // ######## Middleware ###########
@@ -219,6 +224,30 @@ async function reportMenu(ctx){
             ]).extra());
 }
 
+/*const intention = {
+    addCase: {},
+    addTemplateToGenerateReport: {}
+    rights: {}
+};*/
+
+/**
+ * Выводит меню генерации пользователей.
+ * Админ может выбрать пользоватлея для работы, в таком случае, начинает выводиться информация о пользователе
+ * id пользователя, который в работе, храниться в глобальном объекте intention.rights
+ * @param ctx
+ * @returns {Promise<void>}
+ */
+async function rightsMenu(ctx){
+    const message = ['Меню управления пользователями: '];
+    intention.rights[ctx.userId] = 158048277;
+    if((ctx.userId in intention.rights) && intention.rights[ctx.userId] !== null && intention.rights[ctx.userId] !== undefined){
+        message.push(await rights.getUserInfo(intention.rights[ctx.userId]));
+    }else{
+        message.push('Не выбран пользователь для изменения прав доступа');
+    }
+    await ctx.reply(message.join('\n')); //Клаву сюда нарисовать надо!!
+}
+
 bot.start(async (ctx) => {
     await hello(ctx);
 });
@@ -296,6 +325,13 @@ bot.command('showDate', async (ctx) => {
  */
 bot.hears(strings.keyboardConstants.MYSELF, async (ctx) => {
     await mySelfMenu(ctx);
+});
+
+/**
+ * Команда на вывод меню управления правами пользователей
+ */
+bot.hears(strings.keyboardConstants.RIGHTS, async (ctx) => {
+    await rightsMenu(ctx);
 });
 
 /**
