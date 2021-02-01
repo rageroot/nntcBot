@@ -64,6 +64,10 @@ module.exports.getUserInfo = async (userId) => {
     try {
         const userInfo = await users.get(userId);
         if(userInfo){
+            if(userInfo.status === "admin"){
+                return "Выбранный пользователь имеет статуст администратора. Вы не можете управлять " +
+                    "администраторами";
+            }
             message.push([`Выбран пользователь с id: ${userInfo.userId}`],
                 [`Имя: ${userInfo.firstname} ${userInfo.lastname}`],
                 [`username: ${userInfo.username}`],

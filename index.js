@@ -177,9 +177,8 @@ bot.use(async (ctx, next) => {
             intention.addTemplateToGenerateReport[userId] = true;
         }
     }
-
     if(userId in intention.rights){
-        if(intention.rights[userId].userChoise !== null) {
+        if(intention.rights[userId].userChoise != null) {
             if (intention.rights[userId].userChoise === true) {
                 intention.rights[userId].userChoise = false;
             } else if (intention.rights[userId].userChoise === false) {
@@ -267,7 +266,6 @@ async function reportMenu(ctx){
 async function rightsMenu(ctx){
     const message = ['Меню управления пользователями: '];
     const keyboard = [[ Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_CHOISE, strings.commands.RIGHTS_USER_CHOISE)]];
-   //intention.rights[ctx.userId] = 80422700000000;
     if((ctx.userId in intention.rights) && intention.rights[ctx.userId].userChoiseId !== null && intention.rights[ctx.userId].userChoiseId !== undefined){
         message.push(await rights.getUserInfo(intention.rights[ctx.userId].userChoiseId));
         if(message[1].startsWith('Выбран пользователь')){
@@ -276,7 +274,7 @@ async function rightsMenu(ctx){
                 [Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_SET_NOTE, strings.commands.RIGHTS_USER_SET_NOTE)],
                 [Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_CLEAR, strings.commands.RIGHTS_USER_CLEAR)]);
         }else{
-            intention.rights[ctx.userId] = null;
+            intention.rights[ctx.userId].userChoiseId = null;
         }
     }else{
         message.push('Не выбран пользователь для изменения прав доступа');
@@ -410,7 +408,7 @@ bot.on('text', async (ctx) => {
     try {
         if(intention.rights[ctx.userId].userChoise === false){
             intention.rights[ctx.userId].userChoiseId = ctx.message.text.trim();
-            await ctx.reply("Пользователь выбран");
+            await rightsMenu(ctx);
         }else {
             if (ctx.userId in intention.addCase) {     //Если бот предложил пользователю ввести дело, то в объекте будет свойство == id
                 delete intention.addCase[ctx.userId];
