@@ -179,16 +179,16 @@ bot.use(async (ctx, next) => {
  * @returns {Promise<void>}
  */
 async function hello(ctx){
-    let welcomeMessage;
+    let welcomeMessage = 'Добро пожаловать, ' + ctx.userName + '\n';
     let mainKeyboard;
 
     switch (ctx.status) {
         case 'student':
-            welcomeMessage = 'Добро пожаловать, ' + ctx.userName + '\n' + strings.welcomeMessage.forStudents;
+            welcomeMessage += strings.welcomeMessage.forStudents;
             mainKeyboard = strings.mainKeyboard.forStudents;
             break;
         case 'admin':
-            welcomeMessage = 'Добро пожаловать, ' + ctx.userName + '\n' + strings.welcomeMessage.forAdmins;
+            welcomeMessage += strings.welcomeMessage.forAdmins;
             mainKeyboard = strings.mainKeyboard.forAdmins;
     }
 
@@ -239,7 +239,7 @@ async function reportMenu(ctx){
  */
 async function rightsMenu(ctx){
     const message = ['Меню управления пользователями: '];
-    intention.rights[ctx.userId] = 158048277;
+    intention.rights[ctx.userId] = 804227;
     if((ctx.userId in intention.rights) && intention.rights[ctx.userId] !== null && intention.rights[ctx.userId] !== undefined){
         message.push(await rights.getUserInfo(intention.rights[ctx.userId]));
     }else{
