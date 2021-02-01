@@ -455,6 +455,11 @@ async function rightsMenuCallback(ctx, callbackQuery){
                 intention.rights[ctx.userId].userChoise = true;
                 await ctx.reply("Введи id пользователя, дружочек");
                 break;
+            case strings.commands.RIGHTS_USER_CLEAR:
+                intention.rights[ctx.userId].userChoiseId = null;
+                intention.rights[ctx.userId].userChoise = null;
+                await ctx.reply("Выбор сброшен");
+                break;
         }
     }catch (err) {
         await ctx.reply(err.message);
