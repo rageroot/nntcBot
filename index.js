@@ -239,13 +239,23 @@ async function reportMenu(ctx){
  */
 async function rightsMenu(ctx){
     const message = ['Меню управления пользователями: '];
-    intention.rights[ctx.userId] = 804227;
+    const keyboard = [[ Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_CHOISE, strings.commands.RIGHTS_USER_CHOISE)]];
+   //intention.rights[ctx.userId] = 80422700000000;
     if((ctx.userId in intention.rights) && intention.rights[ctx.userId] !== null && intention.rights[ctx.userId] !== undefined){
         message.push(await rights.getUserInfo(intention.rights[ctx.userId]));
+        if(message[1].startsWith('Выбран пользователь')){
+            keyboard.push([Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_SET_STATUS, strings.commands.RIGHTS_USER_SET_STATUS)],
+                [Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_SET_OPENER, strings.commands.RIGHTS_USER_SET_OPENER)],
+                [Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_SET_NOTE, strings.commands.RIGHTS_USER_SET_NOTE)],
+                [Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_CLEAR, strings.commands.RIGHTS_USER_CLEAR)]);
+        }else{
+            intention.rights[ctx.userId] = null;
+        }
     }else{
         message.push('Не выбран пользователь для изменения прав доступа');
     }
-    await ctx.reply(message.join('\n')); //Клаву сюда нарисовать надо!!
+    await ctx.reply(message.join('\n'), Markup.inlineKeyboard(
+        keyboard).extra());
 }
 
 bot.start(async (ctx) => {

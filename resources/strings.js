@@ -20,7 +20,12 @@ const keyboardConstants = {
     REPORTS: "Генератор отчетов",
     REPORTS_MAN: "Инструкция",
     REPORTS_TEMPLATE: "Шаблон для заполнения",
-    REPORTS_GENERATE: "Сгенерировать отчет"
+    REPORTS_GENERATE: "Сгенерировать отчет",
+    RIGHTS_USER_CHOISE: "Выбрать пользователя",
+    RIGHTS_USER_SET_OPENER: "Изменить право открытия двери",
+    RIGHTS_USER_SET_STATUS: "Изменить статус пользователя",
+    RIGHTS_USER_SET_NOTE: "Оставить заметку",
+    RIGHTS_USER_CLEAR: "Отменить выбор",
 }
 
 module.exports.commands = {
@@ -31,7 +36,12 @@ module.exports.commands = {
     MYSELF_QUICK_NEW: "Д:",
     REPORTS_MAN: "reportsMan",
     REPORTS_TEMPLATE: "reportsTemplate",
-    REPORTS_GENERATE: "reportsGenerate"
+    REPORTS_GENERATE: "reportsGenerate",
+    RIGHTS_USER_CHOISE: "userChoise",
+    RIGHTS_USER_SET_OPENER: "userSetOpener",
+    RIGHTS_USER_SET_STATUS: "userSetStatus",
+    RIGHTS_USER_SET_NOTE: "userSetNote",
+    RIGHTS_USER_CLEAR: "userChoiseClear",
 }
 
 module.exports.welcomeMessage = {
