@@ -34,7 +34,12 @@ bd.connect();
  * addTemplateToGenerateReport - намерение загрузить заполненный шаблон для генерации отчетов по практике. Тот же принцип
  *
  * rights - объект, хранящий свойства вида
- *          idАдминистратора: idПользователя, с которым админ ведет работу
+ *          idАдминистратора: userChoiseId- idПользователя, с которым админ ведет работу
+ *          idАдминистратора: userChoise,
+ *                  true(Команда пришла),
+ *                  false(Ожидает текст),
+ *                  null(Сброс намерения) есть ли намерение у админа
+ *              выбрать пользователя для работы
  * @type {{}}
  */
 const intention = {
@@ -143,12 +148,19 @@ bot.use(async (ctx, next) => {
 });
 
 /**
- * Защита от случайного срабатываия записи дел и генерации отчетов.
- * Если сразу после предложения ввести новое дело или загрузить шаблон пользователь выбрал другое действие на клавиатуре
- * или команду- ввод намерение отменяется. Реализовано при помощи добавления свойств в глобальный объект
+ * Защита от случайного срабатываия записи дел, генерации отчетов и управленяи пользователями.
+ * Если сразу после предложения ввести новое дело,
+ * загрузить шаблон,
+ * или выполнить ввод в меню редактирования пользователя
+ * пользователь выбрал другое действие на клавиатуре
+ * или команду- ввод намерение отменяется.
+ * Реализовано при помощи добавления свойств в глобальный объект
+ *
+ * Создает поля в объекте intention.rights, если необходимых для работы нет
  */
 bot.use(async (ctx, next) => {
     const userId = ctx.from.id.toString();
+
     if(userId in intention.addCase){
         if(intention.addCase[userId] === true){
            delete intention.addCase[userId];
@@ -163,6 +175,21 @@ bot.use(async (ctx, next) => {
         }
         else{
             intention.addTemplateToGenerateReport[userId] = true;
+        }
+    }
+
+    if(userId in intention.rights){
+        if(intention.rights[userId].userChoise !== null) {
+            if (intention.rights[userId].userChoise === true) {
+                intention.rights[userId].userChoise = false;
+            } else if (intention.rights[userId].userChoise === false) {
+                intention.rights[userId].userChoise = null;
+            }
+        }
+    }else{
+        intention.rights[userId] = {
+            userChoise: null,
+            userChoiseId: null
         }
     }
     await next();
@@ -241,8 +268,8 @@ async function rightsMenu(ctx){
     const message = ['Меню управления пользователями: '];
     const keyboard = [[ Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_CHOISE, strings.commands.RIGHTS_USER_CHOISE)]];
    //intention.rights[ctx.userId] = 80422700000000;
-    if((ctx.userId in intention.rights) && intention.rights[ctx.userId] !== null && intention.rights[ctx.userId] !== undefined){
-        message.push(await rights.getUserInfo(intention.rights[ctx.userId]));
+    if((ctx.userId in intention.rights) && intention.rights[ctx.userId].userChoiseId !== null && intention.rights[ctx.userId].userChoiseId !== undefined){
+        message.push(await rights.getUserInfo(intention.rights[ctx.userId].userChoiseId));
         if(message[1].startsWith('Выбран пользователь')){
             keyboard.push([Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_SET_STATUS, strings.commands.RIGHTS_USER_SET_STATUS)],
                 [Markup.callbackButton(strings.keyboardConstants.RIGHTS_USER_SET_OPENER, strings.commands.RIGHTS_USER_SET_OPENER)],
@@ -381,17 +408,22 @@ bot.on('document', async (ctx) => {
  */
 bot.on('text', async (ctx) => {
     try {
-        if (ctx.userId in intention.addCase) {     //Если бот предложил пользователю ввести дело, то в объекте будет свойство == id
-            delete intention.addCase[ctx.userId];
-            await ctx.reply(await myself.new(ctx.userId, ctx.userName, ctx.message.text.trim()));
-        } else {
-            if (ctx.message.text.startsWith(strings.commands.MYSELF_QUICK_NEW)) {
-                await ctx.reply(await myself.new(ctx.userId, ctx.userName, ctx.message.text.slice(2).trim()));
+        if(intention.rights[ctx.userId].userChoise === false){
+            intention.rights[ctx.userId].userChoiseId = ctx.message.text.trim();
+            await ctx.reply("Пользователь выбран");
+        }else {
+            if (ctx.userId in intention.addCase) {     //Если бот предложил пользователю ввести дело, то в объекте будет свойство == id
+                delete intention.addCase[ctx.userId];
+                await ctx.reply(await myself.new(ctx.userId, ctx.userName, ctx.message.text.trim()));
             } else {
-                if (ctx.message.text === strings.textConstants.CONFIRM_DELETE) {
-                    await ctx.reply(await myself.clear(ctx.userId));
+                if (ctx.message.text.startsWith(strings.commands.MYSELF_QUICK_NEW)) {
+                    await ctx.reply(await myself.new(ctx.userId, ctx.userName, ctx.message.text.slice(2).trim()));
                 } else {
-                    await hello(ctx);
+                    if (ctx.message.text === strings.textConstants.CONFIRM_DELETE) {
+                        await ctx.reply(await myself.clear(ctx.userId));
+                    } else {
+                        await hello(ctx);
+                    }
                 }
             }
         }
@@ -409,7 +441,27 @@ bot.on('callback_query', async (ctx) =>{
         const callbackQuery = ctx.callbackQuery.data;
         await mySelfMenuCallback(ctx, callbackQuery);
         await reportMenuCallback(ctx, callbackQuery);
+        await rightsMenuCallback(ctx, callbackQuery);
 });
+
+/**
+ * Реакция на нажатие кнопок в меню управления пользователем
+ * @param ctx
+ * @param callbackQuery
+ * @returns {Promise<void>}
+ */
+async function rightsMenuCallback(ctx, callbackQuery){
+    try{
+        switch (callbackQuery) {
+            case strings.commands.RIGHTS_USER_CHOISE:
+                intention.rights[ctx.userId].userChoise = true;
+                await ctx.reply("Введи id пользователя, дружочек");
+                break;
+        }
+    }catch (err) {
+        await ctx.reply(err.message);
+    }
+}
 
 /**
  * Реакция на нажатие кнопок меню генерации отчетов
