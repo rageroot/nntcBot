@@ -186,7 +186,7 @@ bot.use(async (ctx, next) => {
                 intention.rights[userId].userChoise = null;
             }
         }
-//вот тут, скорее всего, можно оптимизировать
+//ЖОПА
         if(intention.rights[userId].newNote != null){
             if (intention.rights[userId].newNote === true) {
                 intention.rights[userId].newNote = false;
@@ -407,12 +407,13 @@ bot.on('document', async (ctx) => {
     }
 });
 
-/**Вот тут тоже не мешало бы поработать. Мусор какой то, а не функция
+/**
  * Выполняется если бот получил произвольный текст.
  * Проверка не было ли предложения ввести дело,
  * Проверка не было ли быстрой команды на ввод дела
  * Проверка на очистку листа сомооценки
  */
+//ЖОПА
 bot.on('text', async (ctx) => {
     try {
         if(intention.rights[ctx.userId].userChoise === false){
