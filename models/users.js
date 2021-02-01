@@ -62,6 +62,11 @@ module.exports.newUser = async (params) => {
     }
 }
 
+/**
+ * Задает первоначальные параметры при создании пользователя из middleWare
+ * @param params
+ * @returns {Promise<*>}
+ */
 module.exports.setUserInfo = async (params) => {
     try {
         const result = await Users.updateOne({userId: params.userId},
@@ -76,6 +81,10 @@ module.exports.setUserInfo = async (params) => {
     }
 }
 
+/**
+ * Получает список всех админов
+ * @returns {Promise<*>}
+ */
 module.exports.getAllAdmin = async () => {
     const admins = await Users.find({status: "admin"},
     {
@@ -85,6 +94,21 @@ module.exports.getAllAdmin = async () => {
         lastname: 1
     });
     return admins;
+}
+
+/**
+ * Изменяет поля у пользователей по запросу админа
+ * @param userId
+ * @param property
+ * @returns {Promise<*>}
+ */
+module.exports.changeUserCharacteristics = async (userId, property) => {
+    try{
+        const result = await Users.updateOne({userId: userId}, property);
+        return  result.nModified;
+    }catch (err) {
+        throw new Error(err.message + ' БД балует');
+    }
 }
 
 /**

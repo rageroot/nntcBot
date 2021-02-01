@@ -40,6 +40,7 @@ bd.connect();
  *                  false(Ожидает текст),
  *                  null(Сброс намерения) есть ли намерение у админа
  *              выбрать пользователя для работы
+ *          idАдминистратора: newNote - намерение пользователя ввести новую заметку. По тому же принципу, что выше
  * @type {{}}
  */
 const intention = {
@@ -183,6 +184,14 @@ bot.use(async (ctx, next) => {
                 intention.rights[userId].userChoise = false;
             } else if (intention.rights[userId].userChoise === false) {
                 intention.rights[userId].userChoise = null;
+            }
+        }
+//вот тут, скорее всего, можно оптимизировать
+        if(intention.rights[userId].newNote != null){
+            if (intention.rights[userId].newNote === true) {
+                intention.rights[userId].newNote = false;
+            } else if (intention.rights[userId].newNote === false) {
+                intention.rights[userId].newNote = null;
             }
         }
     }else{
@@ -398,7 +407,7 @@ bot.on('document', async (ctx) => {
     }
 });
 
-/**
+/**Вот тут тоже не мешало бы поработать. Мусор какой то, а не функция
  * Выполняется если бот получил произвольный текст.
  * Проверка не было ли предложения ввести дело,
  * Проверка не было ли быстрой команды на ввод дела
@@ -409,7 +418,10 @@ bot.on('text', async (ctx) => {
         if(intention.rights[ctx.userId].userChoise === false){
             intention.rights[ctx.userId].userChoiseId = ctx.message.text.trim();
             await rightsMenu(ctx);
-        }else {
+        }else if(intention.rights[ctx.userId].newNote === false){
+            await rights.changeUserProperty(intention.rights[ctx.userId].userChoiseId, 'note', ctx.message.text.trim());
+            await ctx.reply("Заметка повешена на пользователя");
+        } else {
             if (ctx.userId in intention.addCase) {     //Если бот предложил пользователю ввести дело, то в объекте будет свойство == id
                 delete intention.addCase[ctx.userId];
                 await ctx.reply(await myself.new(ctx.userId, ctx.userName, ctx.message.text.trim()));
@@ -459,6 +471,18 @@ async function rightsMenuCallback(ctx, callbackQuery){
                 intention.rights[ctx.userId].userChoiseId = null;
                 intention.rights[ctx.userId].userChoise = null;
                 await ctx.reply("Выбор сброшен");
+                break;
+            case strings.commands.RIGHTS_USER_SET_STATUS:
+                await rights.changeUserProperty(intention.rights[ctx.userId].userChoiseId, 'status');
+                await ctx.reply("Статус изменен");
+                break;
+            case strings.commands.RIGHTS_USER_SET_OPENER:
+                await rights.changeUserProperty(intention.rights[ctx.userId].userChoiseId, 'opener');
+                await ctx.reply("Права на замок изменены");
+                break;
+            case strings.commands.RIGHTS_USER_SET_NOTE:
+                intention.rights[ctx.userId].newNote = true;
+                await ctx.reply("Введи новую заметку о пользователе, дружочек");
                 break;
         }
     }catch (err) {

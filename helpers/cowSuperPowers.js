@@ -83,5 +83,36 @@ module.exports.getUserInfo = async (userId) => {
     {
         return "Какие то проблемы с базой, дружочек, попробуй еще разочек";
     }
+}
 
+/**
+ *Функция для изменения свойств пользователя в базе по запросу админа
+ * @param userId
+ * @param property
+ * @param note необязательный параметр для заметки
+ * @returns {Promise<void>}
+ */
+module.exports.changeUserProperty = async (userId, property, note) => {
+    note = note || '';
+    try {
+        const user = await users.get(userId);
+        const newProperty = {
+            status: user.status,
+            opener: user.opener,
+            note: note,
+        };
+        switch (property) {
+            case 'status':
+                newProperty.status = (newProperty.status === 'student') ? 'teacher' : 'student';
+                break;
+            case 'opener':
+                newProperty.opener = !newProperty.opener;
+                break;
+            default:
+                break;
+        }
+        await users.changeUserCharacteristics(userId, newProperty);
+    }catch (err){
+        throw new Error(err.message + ' у вас проблемы с коровьей суперсилой. Сбоит changeUserProperty');
+    }
 }
