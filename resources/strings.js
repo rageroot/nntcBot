@@ -49,7 +49,16 @@ module.exports.welcomeMessage = {
         'Ты можешь смотреть расписание звонков \nи открывать дверь ВЦ, если тебе лично разрешит\nодин' +
         ' из админов.\nСписок админов можно получить по команде /admins\n' +
         ' чтобы повысить уровень привилегий- проси админа\nПолучить свой id /getId',
-    forTeachers: "",
+    forTeachers: "Твой уровень доступа- преподаватель\n" +
+        'Ты можешь смотреть расписание звонков \nОткрывать дверь ВЦ, если тебе лично разрешит\nодин' +
+        ' из админов.\nСписок админов можно получить по команде /admins\n'+
+        'Можешь получать список активных конференций\n' +
+        'Можешь вести листы самооценки\n' +
+        'Чтобы быстро добавить дело введи:\n' +
+        'Д: %whatYourDo%\n' +
+        'Чтобы включить или выключить отображение дат в листе самооценки: /showDate,\n' +
+        'Можешь генерировать характеристики студентов для УП\n' +
+        'Выебри дейтсвие на клавиатуре, или воспользуйся командами',
     forAdmins: "Твой уровень доступа- администратор\n" +
         "Чтобы быстро добавить дело введи:\n" +
         "Д: %whatYourDo%',\n" +
@@ -85,13 +94,36 @@ module.exports.mainKeyboard = {
                 ]
             ]
         }
+    },
+    forTeachers: {
+        "reply_markup": {
+            "keyboard": [
+                [
+                    keyboardConstants.VC,
+                    keyboardConstants.BELLS,
+                ],
+                [
+                    keyboardConstants.JITSY,
+                    keyboardConstants.MYSELF,
+                    keyboardConstants.REPORTS
+                ]
+            ]
+        }
     }
 }
 
 
 module.exports.listsOfRights = {
     students: [keyboardConstants.BELLS, keyboardConstants.VC, '/start', '/help', '/admins', '/getId'],
-    teachers: [],
+    teachers: [
+        keyboardConstants.RIGHTS,
+        keyboardConstants.RIGHTS_USER_CHOISE,
+        keyboardConstants.RIGHTS_USER_CLEAR,
+        keyboardConstants.RIGHTS_USER_SET_NOTE,
+        keyboardConstants.RIGHTS_USER_SET_OPENER,
+        keyboardConstants.RIGHTS_USER_SET_STATUS,
+        '/logs'
+    ],
 }
 
 module.exports.keyboardConstants = keyboardConstants;

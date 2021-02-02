@@ -79,7 +79,7 @@ bot.use(async (ctx,next) => {
     }else{
         ctx.status = user.status;
         ctx.note = user.note;
-        ctx.opener = (user.status === 'student') ? user.opener : true;
+        ctx.opener = (user.status !== 'admin') ? user.opener : true;
 
         if(user.username === "null"){
             await userModel.setUserInfo(
@@ -225,6 +225,11 @@ async function hello(ctx){
         case 'admin':
             welcomeMessage += strings.welcomeMessage.forAdmins;
             mainKeyboard = strings.mainKeyboard.forAdmins;
+            break;
+        case 'teacher':
+            welcomeMessage += strings.welcomeMessage.forTeachers;
+            mainKeyboard = strings.mainKeyboard.forTeachers;
+            break;
     }
 
     await ctx.reply(welcomeMessage, mainKeyboard);

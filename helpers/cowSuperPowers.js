@@ -32,7 +32,14 @@ module.exports.hasAccess = (status, requestType, request, opener = true) => {
                 return false;
             }
         case "teacher":
-            break;
+            if(!strings.listsOfRights.teachers.includes(request)){
+                if(request === strings.keyboardConstants.VC){
+                    return opener;
+                }else
+                return true;
+            }else{
+                return false;
+            }
         case "admin":
             return true;
         default:
