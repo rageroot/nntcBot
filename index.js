@@ -179,21 +179,9 @@ bot.use(async (ctx, next) => {
         }
     }
     if(userId in intention.rights){
-        if(intention.rights[userId].userChoise != null) {
-            if (intention.rights[userId].userChoise === true) {
-                intention.rights[userId].userChoise = false;
-            } else if (intention.rights[userId].userChoise === false) {
-                intention.rights[userId].userChoise = null;
-            }
-        }
-//ЖОПА
-        if(intention.rights[userId].newNote != null){
-            if (intention.rights[userId].newNote === true) {
-                intention.rights[userId].newNote = false;
-            } else if (intention.rights[userId].newNote === false) {
-                intention.rights[userId].newNote = null;
-            }
-        }
+        intention.rights[userId].userChoise = (intention.rights[userId].userChoise) ? false : null;
+        intention.rights[userId].newNote = (intention.rights[userId].newNote) ? false : null;
+
     }else{
         intention.rights[userId] = {
             userChoise: null,
