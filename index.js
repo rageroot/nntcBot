@@ -318,7 +318,7 @@ bot.command('logs', async (ctx) => {
         await ctx.replyWithDocument({source: pathsToLogs[0]});
         await ctx.replyWithDocument({source: pathsToLogs[1]});
         await logsHelper.garbageCollector(pathsToLogs);
-    }catch (e) {
+    }catch (err) {
         await ctx.reply(err.message);
     }
 });
