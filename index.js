@@ -15,6 +15,7 @@ const bd = require('./models/botBd');
 const userModel = require('./models/users');
 const logs = require('./models/logs');
 const rights = require('./helpers/cowSuperPowers');
+const logsHelper = require('./helpers/logs');
 
 // const easterEggs = require('./helpers/easterEggs');
 // const kursGen = require('./helpers/wizard-kurs-report-generator');
@@ -308,6 +309,13 @@ bot.command('admins', async (ctx) => {
 });
 
 /**
+ * Выгружает csv файла логов пользователей и использования системы.
+ */
+bot.command('logs', async (ctx) => {
+    await ctx.reply(await logsHelper.getLogs(ctx.userId));
+});
+
+/**
  * Команда на открытие двери ВЦ
  */
 bot.hears(strings.keyboardConstants.VC, async (ctx) => {
@@ -406,7 +414,6 @@ bot.on('document', async (ctx) => {
  * Проверка не было ли быстрой команды на ввод дела
  * Проверка на очистку листа сомооценки
  */
-//ЖОПА
 bot.on('text', async (ctx) => {
     try {
         if(intention.rights[ctx.userId].userChoise === false){

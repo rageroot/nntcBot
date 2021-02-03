@@ -97,6 +97,24 @@ module.exports.getAllAdmin = async () => {
 }
 
 /**
+ * Возрвращает список вообще всех пользователей
+ * @returns {Promise<*>}
+ */
+module.exports.getAllUsers = async () => {
+    const users = await Users.find({}, {
+        _id: 0,
+        username: 1,
+        firstname: 1,
+        lastname: 1,
+        note: 1,
+        opener: 1,
+        userId: 1,
+        status: 1,
+    });
+    return users;
+}
+
+/**
  * Изменяет поля у пользователей по запросу админа
  * @param userId
  * @param property
