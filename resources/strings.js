@@ -28,7 +28,7 @@ const keyboardConstants = {
     RIGHTS_USER_CLEAR: "Отменить выбор",
 }
 
-module.exports.commands = {
+const commands = {
     MYSELF_LIST: "myselfList",
     MYSELF_NEW: "myselfNew",
     MYSELF_CLEAR: "myselfClear",
@@ -118,13 +118,14 @@ module.exports.listsOfRights = {
     students: [keyboardConstants.BELLS, keyboardConstants.VC, '/start', '/help', '/admins', '/getId'],
     teachers: [
         keyboardConstants.RIGHTS,
-        keyboardConstants.RIGHTS_USER_CHOISE,
-        keyboardConstants.RIGHTS_USER_CLEAR,
-        keyboardConstants.RIGHTS_USER_SET_NOTE,
-        keyboardConstants.RIGHTS_USER_SET_OPENER,
-        keyboardConstants.RIGHTS_USER_SET_STATUS,
+        commands.RIGHTS_USER_CHOISE,
+        commands.RIGHTS_USER_CLEAR,
+        commands.RIGHTS_USER_SET_NOTE,
+        commands.RIGHTS_USER_SET_OPENER,
+        commands.RIGHTS_USER_SET_STATUS,
         '/logs'
     ],
 }
 
 module.exports.keyboardConstants = keyboardConstants;
+module.exports.commands = commands;

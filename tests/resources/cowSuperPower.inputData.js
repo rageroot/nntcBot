@@ -59,8 +59,8 @@ module.exports.testUsers = [
 module.exports.testDataHasAccess = [
     ['message', strings.keyboardConstants.BELLS],
     ['message', strings.keyboardConstants.JITSY],
-    ['message', strings.keyboardConstants.BELLS, false],
-    ['message', strings.keyboardConstants.BELLS],
+    ['message', strings.keyboardConstants.VC, false],
+    ['message', strings.keyboardConstants.VC],
     ['message', strings.keyboardConstants.MYSELF],
     ['message', strings.keyboardConstants.RIGHTS],
     ['message', strings.keyboardConstants.REPORTS],
@@ -83,10 +83,17 @@ module.exports.testDataHasAccess = [
     ['callback_query', strings.commands.RIGHTS_USER_SET_NOTE],
     ['callback_query', strings.commands.RIGHTS_USER_CLEAR],
     ['callback_query', strings.commands.RIGHTS_USER_CHOISE],
-    ['callback_query', strings.commands.RIGHTS_USER_SET_OPENER],
-    ['callback_query', strings.commands.RIGHTS_USER_SET_OPENER],
-    ['callback_query', strings.commands.RIGHTS_USER_SET_OPENER],
-    ['callback_query', strings.commands.RIGHTS_USER_SET_OPENER],
+    ['message','/logs'],
 ];
 
-module.exports.hasAccessForStudents = [];
+module.exports.hasAccessForTeachers = [
+    true, true, false, true, true, false, true, true, true, true, true, true,
+    true, true, true, true, true, true, true, true, true, false, false, false,
+    false, false, false,
+];
+
+module.exports.hasAccessForStudents = [
+    true, false, false, true, false, false, false, true, true, true, true, false,
+    false, false, false, false, false, false, false, false, false, false, false,
+    false, false, false, false,
+];

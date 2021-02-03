@@ -24,27 +24,31 @@ afterAll(async () => {
 
 describe('module cowSuperPower', () => {
     describe('function \'getUserInfo\'', () => {
-        test('student has access', () => {
+        test('student has access', async () => {
+            const results = [];
+            for(const testData of inputData.testDataHasAccess){
+                results.push(await superPower.hasAccess('student', ...testData));
+            }
+            expect(results).toEqual(inputData.hasAccessForStudents);
+        });
 
+        test('teachers has access', async () => {
+            const results = [];
+            for(const testData of inputData.testDataHasAccess){
+                results.push(await superPower.hasAccess('teacher', ...testData));
+            }
+            expect(results).toEqual(inputData.hasAccessForTeachers);
+        });
+
+        test('admins has access', async () => {
+            const results = [];
+            for(const testData of inputData.testDataHasAccess){
+                results.push(await superPower.hasAccess('admin', ...testData));
+            }
+            expect(results).not.toContain(false);
         });
     });
 });
-
-/*
-* const ob = [
-    [true, true],
-    [false, false]
-];
-
-function newf(one, two, three, four = false){
-    console.log(one, two, three, four);
-}
-
-for(let m of ob){
-    newf(true, ...m);
-}
-
-* */
 
 async function dropAllCollections () {
     const collections = Object.keys(mongoose.connection.collections)
