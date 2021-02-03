@@ -309,10 +309,18 @@ bot.command('admins', async (ctx) => {
 });
 
 /**
- * Выгружает csv файла логов пользователей и использования системы.
+ * Выгружает csv файла логов пользователей и использования системы,
+ * Прибирает мусор
  */
 bot.command('logs', async (ctx) => {
-    await ctx.reply(await logsHelper.getLogs(ctx.userId));
+    try {
+        const pathsToLogs = await logsHelper.getLogs(ctx.userId);
+        await ctx.replyWithDocument({source: pathsToLogs[0]});
+        await ctx.replyWithDocument({source: pathsToLogs[1]});
+        await logsHelper.garbageCollector(pathsToLogs);
+    }catch (e) {
+        await ctx.reply(err.message);
+    }
 });
 
 /**

@@ -24,3 +24,8 @@ module.exports.addLog = async (param) => {
         throw new Error('Ошибка при сохранении в базу данных');
     }
 }
+
+module.exports.getAllLogs = async () => {
+    const logs = await Logs.find({});
+    return logs;
+}
