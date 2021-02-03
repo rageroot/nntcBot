@@ -23,7 +23,7 @@ afterAll(async () => {
 });
 
 describe('module cowSuperPower', () => {
-    describe('function \'getUserInfo\'', () => {
+    describe('function \'hasAccess\'', () => {
         test('student has access', async () => {
             const results = [];
             for(const testData of inputData.testDataHasAccess){
@@ -46,6 +46,13 @@ describe('module cowSuperPower', () => {
                 results.push(await superPower.hasAccess('admin', ...testData));
             }
             expect(results).not.toContain(false);
+        });
+    });
+
+    describe('function \'getAdmins\'', () => {
+        test('get all admins', async () => {
+            const res = await superPower.getAdmins();
+            expect(res.split('\n')).toEqual(inputData.allAdmins);
         });
     });
 });

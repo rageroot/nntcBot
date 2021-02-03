@@ -1,5 +1,9 @@
 const strings = require('../../resources/strings');
 
+/**
+ * Данные для тестовой базы пользователей
+ * @type {({note: string, firstname: string, opener: boolean, userId: number, status: string, username: string, lastname: string}|{note: string, firstname: string, opener: boolean, userId: number, status: string, username: string, lastname: string}|{note: string, firstname: string, opener: boolean, userId: number, status: string, username: string, lastname: string}|{note: string, firstname: string, opener: boolean, userId: number, status: string, username: string, lastname: string}|{note: string, firstname: string, userId: number, status: string, username: string, lastname: string})[]}
+ */
 module.exports.testUsers = [
     {
         userId: 111,
@@ -55,7 +59,20 @@ module.exports.testUsers = [
     }
 ];
 
+/**
+ * Эталон вывода всеъ админов
+ * @type {string[]}
+ */
+module.exports.allAdmins = [
+    'Список админов:',
+    '@555 f555 555f',
+    '@666 f666 666f'
+];
 
+/**
+ * Все возможные команды
+ * @type {((string|string)[]|(string|string)[]|(string|string|boolean)[]|(string|string)[]|(string|string)[])[]}
+ */
 module.exports.testDataHasAccess = [
     ['message', strings.keyboardConstants.BELLS],
     ['message', strings.keyboardConstants.JITSY],
@@ -86,12 +103,20 @@ module.exports.testDataHasAccess = [
     ['message','/logs'],
 ];
 
+/**
+ * Эталон ответов фунции hasAccess для учителя
+ * @type {boolean[]}
+ */
 module.exports.hasAccessForTeachers = [
     true, true, false, true, true, false, true, true, true, true, true, true,
     true, true, true, true, true, true, true, true, true, false, false, false,
     false, false, false,
 ];
 
+/**
+ * Эталон ответов фунции hasAccess для студента
+ * @type {boolean[]}
+ */
 module.exports.hasAccessForStudents = [
     true, false, false, true, false, false, false, true, true, true, true, false,
     false, false, false, false, false, false, false, false, false, false, false,

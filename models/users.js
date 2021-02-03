@@ -51,7 +51,10 @@ module.exports.newUser = async (params) => {
             userId: params.userId,
             username: params.username,
             firstname: params.firstname,
-            lastname: params.lastname
+            lastname: params.lastname,
+            status: params.status || 'student',
+            opener: params.opener || false,
+            note: params.note || ' ',
         }
     );
 
