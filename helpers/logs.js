@@ -46,7 +46,7 @@ async function generateUsageLog(path){
     for(const log of logs){
         const date = new Date(log.time);
         date.setHours(date.getHours());
-        arrayForCsv.push(`${log.userId},${log.username},${log.realname},${date},${log.messageType},${log.message},${log.note}`);
+        arrayForCsv.push(`${log.userId},${log.username},${log.realname},${date},${log.messageType},${log.message},${log.note.replace(/\$,\$/g,'.')}`);
     }
     await fs.writeFile(path, arrayForCsv.join('\n'));
 }
