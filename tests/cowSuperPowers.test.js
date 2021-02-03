@@ -24,11 +24,27 @@ afterAll(async () => {
 
 describe('module cowSuperPower', () => {
     describe('function \'getUserInfo\'', () => {
-        test('normal behavior', () => {
+        test('student has access', () => {
 
         });
     });
 });
+
+/*
+* const ob = [
+    [true, true],
+    [false, false]
+];
+
+function newf(one, two, three, four = false){
+    console.log(one, two, three, four);
+}
+
+for(let m of ob){
+    newf(true, ...m);
+}
+
+* */
 
 async function dropAllCollections () {
     const collections = Object.keys(mongoose.connection.collections)

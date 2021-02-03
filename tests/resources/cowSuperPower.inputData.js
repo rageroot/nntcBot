@@ -1,3 +1,5 @@
+const strings = require('../../resources/strings');
+
 module.exports.testUsers = [
     {
         userId: 111,
@@ -52,3 +54,39 @@ module.exports.testUsers = [
         note: 'note 666',
     }
 ];
+
+
+module.exports.testDataHasAccess = [
+    ['message', strings.keyboardConstants.BELLS],
+    ['message', strings.keyboardConstants.JITSY],
+    ['message', strings.keyboardConstants.BELLS, false],
+    ['message', strings.keyboardConstants.BELLS],
+    ['message', strings.keyboardConstants.MYSELF],
+    ['message', strings.keyboardConstants.RIGHTS],
+    ['message', strings.keyboardConstants.REPORTS],
+    ['message','/start'],
+    ['message','/help'],
+    ['message','/admins'],
+    ['message','/getId'],
+    ['message','/showDate'],
+    ['message','Д: 123'],
+    ['message','qwerty'],
+    ['callback_query', strings.commands.MYSELF_LIST],
+    ['callback_query', strings.commands.MYSELF_NEW],
+    ['callback_query', strings.commands.MYSELF_CLEAR],
+    ['callback_query', strings.commands.MYSELF_GET_FILE],
+    ['callback_query', strings.commands.REPORTS_GENERATE],
+    ['callback_query', strings.commands.REPORTS_MAN],
+    ['callback_query', strings.commands.REPORTS_TEMPLATE],
+    ['callback_query', strings.commands.RIGHTS_USER_SET_STATUS],
+    ['callback_query', strings.commands.RIGHTS_USER_SET_OPENER],
+    ['callback_query', strings.commands.RIGHTS_USER_SET_NOTE],
+    ['callback_query', strings.commands.RIGHTS_USER_CLEAR],
+    ['callback_query', strings.commands.RIGHTS_USER_CHOISE],
+    ['callback_query', strings.commands.RIGHTS_USER_SET_OPENER],
+    ['callback_query', strings.commands.RIGHTS_USER_SET_OPENER],
+    ['callback_query', strings.commands.RIGHTS_USER_SET_OPENER],
+    ['callback_query', strings.commands.RIGHTS_USER_SET_OPENER],
+];
+
+module.exports.hasAccessForStudents = [];
