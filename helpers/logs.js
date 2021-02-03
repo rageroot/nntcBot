@@ -29,7 +29,7 @@ async function generateUsersLog(path){
     const arrayForCsv = ['userId,status,Name,userName,opener,note'];
 
     for(const user of users){
-        arrayForCsv.push(`${user.userId},${user.status},${user.firstname} ${user.lastname},${user.username},${user.opener},${user.note}`);
+        arrayForCsv.push(`${user.userId},${user.status},${user.firstname} ${user.lastname},${user.username},${user.opener},${user.note.replace(/,/g,'.')}`);
     }
     await fs.writeFile(path, arrayForCsv.join('\n'));
 }
@@ -46,7 +46,7 @@ async function generateUsageLog(path){
     for(const log of logs){
         const date = new Date(log.time);
         date.setHours(date.getHours());
-        arrayForCsv.push(`${log.userId},${log.username},${log.realname},${date},${log.messageType},${log.message},${log.note.replace(/\$,\$/g,'.')}`);
+        arrayForCsv.push(`${log.userId},${log.username},${log.realname},${date},${log.messageType},${log.message},${log.note.replace(/,/g,'.')}`);
     }
     await fs.writeFile(path, arrayForCsv.join('\n'));
 }
