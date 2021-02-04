@@ -3,6 +3,8 @@ const users = require('../models/users');
 const mongoose = require('mongoose');
 const inputData = require('../tests/resources/cowSuperPower.inputData');
 
+const modelUserGetSpy = jest.spyOn(users, 'get');
+
 beforeAll(async () => {
     await mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true, useUnifiedTopology: true });
     for(const testUser of inputData.testUsers){
@@ -69,6 +71,16 @@ describe('module cowSuperPower', () => {
             expect(teacher.split('\n')).toEqual(inputData.getUserInfoTeacher);
             expect(admin).toBe(inputData.getUserInfoAdmin);
             expect(wrongUser).toBe(inputData.getUserInfoWrongUser);
+        });
+        test('error', async () => {
+            modelUserGetSpy.mockRejectedValueOnce(new Error('jest test error'));
+
+            try{
+                await superPower.getUserInfo(111);
+            }catch (err) {
+                expect(err.message).toContain("Какие то проблемы с базой, дружочек, попробуй еще разочек");
+            }
+
         });
     });
 
