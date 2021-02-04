@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const inputData = require('../tests/resources/cowSuperPower.inputData');
 
 const modelUserGetSpy = jest.spyOn(users, 'get');
+const modelUserChangeUserCharacteristicsSpy = jest.spyOn(users, 'changeUserCharacteristics');
 
 beforeAll(async () => {
     await mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true, useUnifiedTopology: true });
@@ -80,7 +81,46 @@ describe('module cowSuperPower', () => {
             }catch (err) {
                 expect(err.message).toContain("Какие то проблемы с базой, дружочек, попробуй еще разочек");
             }
+        });
+    });
 
+    describe('function \'changeUserProperty\'', () => {
+        test('normal behavior', async () => {
+            const reference = await users.get(111);
+
+            expect(reference.status).toBe('student');
+            expect(reference.opener).toBe(false);
+            expect(reference.note).toBe('note 111');
+
+            await superPower.changeUserProperty(111, 'status');
+            await superPower.changeUserProperty(111, 'opener');
+            await superPower.changeUserProperty(111, 'note', 'test');
+
+            const result = await users.get(111);
+
+            expect(result.status).toBe('teacher');
+            expect(result.opener).toBe(true);
+            expect(result.note).toBe('test');
+        });
+
+        test('Error in users.get', async () => {
+            modelUserGetSpy.mockRejectedValueOnce(new Error('Jest test error'));
+
+            try {
+                await superPower.changeUserProperty(111, 'any');
+            }catch (err) {
+                expect(err.message).toBe('Jest test error у вас проблемы с коровьей суперсилой. Сбоит changeUserProperty');
+            }
+        });
+
+        test('Error in users.changeUserCharacteristics', async () => {
+            modelUserChangeUserCharacteristicsSpy.mockRejectedValueOnce(new Error('Jest test error'));
+
+            try {
+                await superPower.changeUserProperty(111, 'any');
+            }catch (err) {
+                expect(err.message).toBe('Jest test error у вас проблемы с коровьей суперсилой. Сбоит changeUserProperty');
+            }
         });
     });
 
