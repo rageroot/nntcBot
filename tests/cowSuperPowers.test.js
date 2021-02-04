@@ -55,6 +55,23 @@ describe('module cowSuperPower', () => {
             expect(res.split('\n')).toEqual(inputData.allAdmins);
         });
     });
+
+    describe('function \'getUserInfo\'', () => {
+        test('normal behavior', async () => {
+            const studentWithoutDoor = await superPower.getUserInfo(111);
+            const studentWithDoor = await superPower.getUserInfo(222);
+            const teacher = await superPower.getUserInfo(333);
+            const admin = await superPower.getUserInfo(555);
+            const wrongUser = await superPower.getUserInfo(123123);
+
+            expect(studentWithoutDoor.split('\n')).toEqual(inputData.getUserInfoStudentWithoutDoor);
+            expect(studentWithDoor.split('\n')).toEqual(inputData.getUserInfoStudentWithDoor);
+            expect(teacher.split('\n')).toEqual(inputData.getUserInfoTeacher);
+            expect(admin).toBe(inputData.getUserInfoAdmin);
+            expect(wrongUser).toBe(inputData.getUserInfoWrongUser);
+        });
+    });
+
 });
 
 async function dropAllCollections () {

@@ -122,3 +122,35 @@ module.exports.hasAccessForStudents = [
     false, false, false, false, false, false, false, false, false, false, false,
     false, false, false, false,
 ];
+
+module.exports.getUserInfoStudentWithoutDoor = [
+    'Выбран пользователь с id: 111',
+    'Имя: f111 111f',
+    'username: 111',
+    'Текущий статус: student',
+    'Открывать дверь ВЦ: НЕ МОЖЕТ',
+    'Заметки: note 111',
+];
+
+module.exports.getUserInfoStudentWithDoor = [
+    'Выбран пользователь с id: 222',
+    'Имя: f222 222f',
+    'username: 222',
+    'Текущий статус: student',
+    'Открывать дверь ВЦ: МОЖЕТ',
+    'Заметки: note 222',
+];
+
+module.exports.getUserInfoTeacher = [
+    'Выбран пользователь с id: 333',
+    'Имя: f333 333f',
+    'username: 333',
+    'Текущий статус: teacher',
+    'Открывать дверь ВЦ: МОЖЕТ',
+    'Заметки: note 333',
+];
+
+module.exports.getUserInfoAdmin = "Выбранный пользователь имеет статуст администратора. Вы не можете управлять " +
+    "администраторами";
+
+module.exports.getUserInfoWrongUser = 'Пользователя 123123 нет, дружочек, попробуй другой разочек';
