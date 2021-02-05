@@ -60,7 +60,7 @@ module.exports.garbageCollector = async (paths) => {
         await fs.unlink(paths[0]);
         await fs.unlink(paths[1]);
     }catch (err) {
-        throw new Error(err.message + 'не могу собрать мусор в модуле logs');
+        throw new Error('Не могу собрать мусор в модуле logs');
     }
 
 }

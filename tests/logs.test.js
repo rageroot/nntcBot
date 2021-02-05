@@ -6,6 +6,7 @@ const logs = require('../helpers/logs');
 const mongoose = require('mongoose');
 
 const fsWriteFileSpy = jest.spyOn(fs, 'writeFile');
+const fsUnlinkSpy = jest.spyOn(fs, 'unlink');
 
 beforeAll(async () => {
     await mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true, useUnifiedTopology: true });
@@ -63,7 +64,27 @@ describe('module \'logs\'', () => {
                 expect(err.message).toBe('Jest test error ошибка при создании логов');
             }
         });
-    })
+    });
+
+    describe('function \'garbage collector\'', () => {
+        test('normal behavior', async () => {
+            fsUnlinkSpy.mockResolvedValue('Ok');
+
+            await logs.garbageCollector(['1', '2']);
+            expect(fsUnlinkSpy.mock.calls[0][0]).toBe('1');
+            expect(fsUnlinkSpy.mock.calls[1][0]).toBe('2');
+        });
+
+        test('error test', async () => {
+            fsUnlinkSpy.mockRejectedValueOnce('Jest test error');
+
+            try {
+                await logs.garbageCollector(['1', '2']);
+            }catch (err) {
+                expect(err.message).toBe('Не могу собрать мусор в модуле logs');
+            }
+        });
+    });
 });
 
 
