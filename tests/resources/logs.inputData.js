@@ -39,3 +39,12 @@ module.exports.testLogs = [
         message: "/help",
     },
 ];
+
+module.exports.referenceForUsers =
+    "userId,status,Name,userName,opener,note\n" +
+    "111,student,f111 111f,111,false,note 111\n" +
+    "222,teacher,f222 222f,222,true,note 222";
+module.exports.referenceForLogs =
+    "userId,username,realname,time,messageType,message,note\n" +
+    "123,123,f123 123f,Mon Feb 01 2021 20:51:10 GMT+0300 (GMT+03:00),message,/getId,test. test. test\n" +
+    "456,456,f456 456f,Mon Feb 01 2021 20:50:12 GMT+0300 (GMT+03:00),message,/help,test. test. test";
