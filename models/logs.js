@@ -8,7 +8,7 @@ const logsSchema = mongoose.Schema({
     userId: {type: Number, min: 1},
     username: {type: String},
     realname: {type: String},
-    time: {type: Number, default: new Date()},
+    time: {type: Number, default: Date.now()},
     messageType: {type: String},
     message: {type: String},
     note: {type: String, default: ""},

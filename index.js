@@ -104,6 +104,7 @@ bot.use(async (ctx, next) => {
         username: ctx.from.username,
         realname: ctx.from.first_name + " " + ctx.from.last_name,
         note: ctx.note,
+        time: new Date(),
     };
     switch (ctx.updateType){
         case "message":
