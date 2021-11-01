@@ -1,18 +1,19 @@
 const child_process = require('child_process');
 
+const cmd = '/usr/bin/ssh -i /home/ebot/.ssh/id_rsa administrator@192.168.10.187 -tt /srv/nntc/jitsi/jitsi-status.sh';
+const baseDomain = 'https://online.nntc.nnov.ru';
+const blackList = [
+    'org.jitsi.jicofo.health'
+];
+
 /**
  * выводит список текущих конференций
  * @returns {Promise<unknown>}
  */
 module.exports.health = () => {
     return new Promise(resolve => {
-        const cmd = '/usr/bin/ssh -i /home/ebot/.ssh/id_rsa administrator@192.168.10.187 -tt /srv/nntc/jitsi/jitsi-status.sh';
         try {
             const result = JSON.parse(child_process.execSync(cmd));
-            const baseDomain = 'https://online.nntc.nnov.ru';
-            const blackList = [
-                'org.jitsi.jicofo.health'
-            ];
             let confs = [];
             result.forEach(l1 => {
                 if (l1.length){
