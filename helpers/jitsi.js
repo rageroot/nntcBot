@@ -13,24 +13,25 @@ const blackList = [
 module.exports.health = () => {
     return new Promise(resolve => {
         try {
-            const result = JSON.parse(child_process.execSync(cmd));
             let confs = [];
+            let confNumber = 0;
             result.forEach(l1 => {
-                if (l1.length){
+                if (l1.length) {
                     l1.forEach(l2 => {
-                        if (l2.length){
+                        if (l2.length) {
                             l2.forEach(l3 => {
                                 let writeEnable = true;
                                 let roomName = l3.roomname;
                                 blackList.forEach(blItem => {
-                                    if (writeEnable){
+                                    if (writeEnable) {
                                         writeEnable = ! (blItem === roomName.substr(0, blItem.length));
                                     }
                                 });
 
-                                if (writeEnable){
+                                if (writeEnable) {
+                                    confNumber++;
                                     confs.push(
-                                        [baseDomain, l3.roomname].join('/')
+                                        confNumber + ". " + [baseDomain, l3.roomname].join('/') + " — " + l3.NBparticipant
                                     );
                                 }
                             });
@@ -39,7 +40,7 @@ module.exports.health = () => {
                 }
             });
             let responseMessage;
-            if (! confs.length){
+            if (! confs.length) {
                 responseMessage = 'конференции пока не идут';
             } else {
                 responseMessage = 'сейчас идут конференции:\n' + confs.join('\n');
