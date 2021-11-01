@@ -15,6 +15,7 @@ module.exports.health = () => {
         try {
             let confs = [];
             let confNumber = 0;
+            const result = JSON.parse(child_process.execSync(cmd));
             result.forEach(l1 => {
                 if (l1.length) {
                     l1.forEach(l2 => {
