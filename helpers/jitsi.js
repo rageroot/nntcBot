@@ -15,6 +15,7 @@ module.exports.health = () => {
 			'org.jitsi.jicofo.health'
 		];
 		let confs = [];
+		let confNumber = 0;
 		result.forEach(l1=>{
 			//console.log('l1', l1);
 			if(l1.length){
@@ -32,8 +33,9 @@ module.exports.health = () => {
 							});
 
 							if(writeEnable){
+								confNumber++;
 								confs.push(
-									[baseDomain, l3.roomname].join('/')
+									  confNumber + ". " + [baseDomain, l3.roomname].join('/') + " — " + l3.NBparticipant
 								);
 							}
 						});
