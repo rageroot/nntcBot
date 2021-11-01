@@ -35,7 +35,7 @@ module.exports.health = () => {
 							if(writeEnable){
 								confNumber++;
 								confs.push(
-									confNumber + ". " + [baseDomain, l3.roomname].join('/') + " (" + l3.NBparticipant + ")"
+									  confNumber + ". " + [baseDomain, l3.roomname].join('/') + " — " + l3.NBparticipant
 								);
 							}
 						});
