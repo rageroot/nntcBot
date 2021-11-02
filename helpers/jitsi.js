@@ -31,9 +31,22 @@ module.exports.health = () => {
 
                                 if (writeEnable) {
                                     confNumber++;
-                                    confs.push(
-                                        confNumber + ". " + [baseDomain, l3.roomname].join('/') + " — " + l3.NBparticipant
-                                    );
+                                    conference = confNumber + ". " + [baseDomain, l3.roomname].join('/') + " — " + l3.NBparticipant;
+                                    l3.participant.forEach( participant => {
+                                        conference += "\n    " + participant.display_name;
+                                        if (participant.audiomuted) {
+                                            confenrence += " 🔇";
+                                        } else {
+                                            confenrence += " 🔊";
+                                        }
+
+                                        if (participant.videomuted) {
+                                            conference += " 📷";
+                                        } else {
+                                            conference += " 📸";
+                                        }
+                                    });
+                                    confs.push(conference);
                                 }
                             });
                         }
