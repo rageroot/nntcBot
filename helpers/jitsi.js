@@ -32,12 +32,13 @@ module.exports.health = () => {
                                 if (writeEnable) {
                                     confNumber++;
                                     conference = confNumber + ". " + [baseDomain, l3.roomname].join('/') + " — " + l3.NBparticipant;
+
                                     l3.participant.forEach( participant => {
                                         conference += "\n    " + participant.display_name;
                                         if (participant.audiomuted) {
-                                            confenrence += " 🔇";
+                                            conference += " 🔇";
                                         } else {
-                                            confenrence += " 🔊";
+                                            conference += " 🔊";
                                         }
 
                                         if (participant.videomuted) {
