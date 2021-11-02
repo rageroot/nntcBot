@@ -15,6 +15,7 @@ module.exports.health = () => {
         try {
             let confs = [];
             let confNumber = 0;
+            let participantNumber = 0;
             const result = JSON.parse(child_process.execSync(cmd));
             result.forEach(l1 => {
                 if (l1.length) {
@@ -31,6 +32,7 @@ module.exports.health = () => {
 
                                 if (writeEnable) {
                                     confNumber++;
+                                    participantNumber += parseInt(l3.NBparticipant);
                                     conference = confNumber + ". " + [baseDomain, l3.roomname].join('/') + " — " + l3.NBparticipant;
 
                                     l3.participant.forEach( participant => {
@@ -59,6 +61,7 @@ module.exports.health = () => {
                 responseMessage = 'конференции пока не идут';
             } else {
                 responseMessage = 'сейчас идут конференции:\n' + confs.join('\n');
+                responseMessage += "\n\nВсего участников: " + participantNumber;
             }
             resolve(responseMessage);
         } catch(e) {
